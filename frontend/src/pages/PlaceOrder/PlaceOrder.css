@@ -1,0 +1,111 @@
+.place-order {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 50px;
+    margin-top: 100px;
+}
+
+.place-order-left {
+    width: 100%;
+    max-width: max(30%, 500px);
+}
+
+.place-order-left .title {
+    font-size: 30px;
+    font-weight: 600;
+    margin-bottom: 50px;
+}
+
+.place-order-left input {
+    margin-bottom: 15px;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #c5c5c5;
+    border-radius: 4px;
+    outline-color: tomato;
+}
+
+.place-order-left .multi-fields {
+    display: flex;
+    gap: 10px;
+}
+
+.place-order-right {
+    width: 100%;
+    max-width: max(40%, 500px);
+}
+
+.place-order .cart-total button {
+    margin-top: 30px;
+}
+
+.payment-options {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.payment-option {
+    width: 100%;
+    max-width: 250px;
+    padding: 15px;
+    border: 1px solid #c5c5c5;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.payment-option input[type="radio"] {
+    margin-right: 10px;
+}
+
+.payment-option span {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.payment-option:hover {
+    border-color: tomato;
+}
+
+.payment-option.selected {
+    border-color: tomato;
+    background-color: #f9f9f9;
+}
+
+/* Responsive design */
+
+@media only screen and (max-width: 768px) {
+    .payment-option {
+        max-width: 200px;
+        padding: 10px;
+    }
+
+    .payment-option span {
+        font-size: 14px;
+    }
+}
+
+@media only screen and (max-width: 480px) {
+    .payment-option {
+        max-width: 150px;
+        padding: 5px;
+    }
+
+    .payment-option span {
+        font-size: 12px;
+    }
+}
+
+@media only screen and (max-width: 320px) {
+    .payment-option {
+        max-width: 100%;
+        padding: 5px;
+    }
+
+    .payment-option span {
+        font-size: 10px;
+    }
+}

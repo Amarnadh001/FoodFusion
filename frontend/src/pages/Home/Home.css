@@ -1,0 +1,43 @@
+.search-bar {
+    padding: 12px 20px;
+    margin: 20px auto;
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    font-size: 16px;
+    background-color: #f9f9f9;
+    transition: all 0.3s ease;
+ }
+ 
+ .search-bar:focus {
+    border-color: #5d9bff;
+    outline: none;
+    box-shadow: 0 0 8px rgba(93, 155, 255, 0.4);
+ }
+ 
+ .search-bar::placeholder {
+    color: #888;
+    opacity: 1;
+ }
+ 
+ .search-bar:hover {
+    border-color: #bbb;
+ }
+ 
+ /* Responsive Design */
+ @media (max-width: 600px) {
+    .search-bar {
+       width: 80%; /* Take up 80% of the screen width */
+       padding: 10px; /* Reduce padding */
+       font-size: 14px; /* Slightly smaller font size for mobile */
+    }
+ }
+ 
+ @media (max-width: 400px) {
+    .search-bar {
+       width: 90%; /* Take up 90% of the screen width */
+       padding: 8px; /* Further reduce padding */
+       font-size: 12px; /* Smaller font size for very small screens */
+    }
+ }
+ 

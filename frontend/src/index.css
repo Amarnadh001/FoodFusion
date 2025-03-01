@@ -1,0 +1,67 @@
+/* Importing the Outfit font */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
+/* Global reset styles */
+*{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: 'Outfit', sans-serif;
+  scroll-behavior: smooth;
+}
+
+body{
+  min-height: 100vh;
+}
+
+/* Global link styling */
+a{
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Main app container */
+.app{
+  width: 80%;
+  margin: auto;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* High contrast mode styles */
+@media (forced-colors: active) {
+  /* Adjust body styles for high-contrast mode */
+  body {
+    background-color: black;
+    color: white;
+  }
+
+  /* Links */
+  a {
+    color: yellow;  /* Make links stand out in yellow */
+  }
+
+  /* Button styles for high-contrast mode */
+  button {
+    background-color: black;
+    color: white;
+    border: 2px solid white;
+  }
+
+  /* Any other customizations for high-contrast mode */
+  .app {
+    background-color: black;
+    color: white;
+  }
+}
+@media (forced-colors: active) {
+  /* Your high-contrast styles here */
+}
