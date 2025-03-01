@@ -42,7 +42,7 @@ const FoodDetails = () => {
 
   return (
     <div className="food-details">
-      <img src={`http://localhost:4000/uploads/${food.image}`} alt={food.name} className="food-image" />
+      <img src={`https://foodfusion-backend-lfj9.onrender.com/uploads/${food.image}`} alt={food.name} className="food-image" />
       <h1>{food.name}</h1>
       <p>{food.description}</p>
       <h2>Ingredients</h2>
