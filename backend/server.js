@@ -19,8 +19,8 @@ const port = process.env.PORT || 4000;
 // Enhanced CORS configuration
 const corsOptions = {
   origin: [
-    process.env.FRONTEND_URL || "http://localhost:5174",
-    process.env.ADMIN_URL || "http://localhost:5173",
+    process.env.FRONTEND_URL || "https://foodfusion-frontend.onrender.com",
+    process.env.ADMIN_URL || "https://foodfusion-admin.onrender.com",
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization", "token"],
