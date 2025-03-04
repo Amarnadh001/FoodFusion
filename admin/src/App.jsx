@@ -12,7 +12,7 @@ import ListCoupons from './pages/Coupons/ListCoupons'
 
 const App = () => {
 
-  const url = "http://localhost:4000"
+  const url = "https://foodfusion-backend-lfj9.onrender.com"
   return (
     <div>
       <ToastContainer />
