@@ -2,6 +2,7 @@ import Stripe from 'stripe';
 import orderModel from "../models/orderModels.js";
 import userModel from '../models/userModel.js';
 import dotenv from 'dotenv';
+import Coupon from '../models/couponModel.js'; // Import the Coupon model
 
 dotenv.config(); // Load environment variables
 
@@ -9,21 +10,34 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Place user order for frontend
 const placeOrder = async (req, res) => {
-  const frontend_url = process.env.FRONTEND_URL || "https://del-exscel-frontend.onrender.com";
+  const frontend_url = process.env.FRONTEND_URL || "http://localhost:5174";
 
   try {
+    let { userId, items, amount, address, paymentMethod, couponCode } = req.body;
+
+    let discountAmount = 0;
+    if (couponCode) {
+      const coupon = await Coupon.findOne({ code: couponCode, active: true });
+      if (coupon && (!coupon.expiresAt || coupon.expiresAt > new Date())) {
+        discountAmount = (amount * coupon.discount) / 100;
+        amount -= discountAmount;
+      }
+    }
+
     const newOrder = new orderModel({
-      userId: req.body.userId,
-      items: req.body.items,
-      amount: req.body.amount,
-      address: req.body.address,
-      payment: req.body.paymentMethod === "cod" ? true : false,
-      paymentMethod: req.body.paymentMethod,
+      userId: userId,
+      items: items,
+      amount: amount,
+      address: address,
+      payment: paymentMethod === "cod" ? true : false,
+      paymentMethod: paymentMethod,
+      discount: discountAmount, // Save the discount amount
+      couponCode: couponCode, // Save the coupon code used
     });
     await newOrder.save();
-    await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} });
+    await userModel.findByIdAndUpdate(userId, { cartData: {} });
 
-    const line_items = req.body.items.map((item) => ({
+    const line_items = items.map((item) => ({
       price_data: {
         currency: "inr",
         product_data: {

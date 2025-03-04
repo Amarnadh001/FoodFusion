@@ -1,90 +1,99 @@
-import axios from 'axios'
-import React, { useContext, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { StoreContext } from '../../context/StoreContext'
-import './PlaceOrder.css'
+import axios from 'axios';
+import React, { useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { StoreContext } from '../../context/StoreContext';
+import './PlaceOrder.css';
 
 const PlaceOrder = () => {
-
-  const { getTotalCartAmount, token, food_list, cartItems, url } = useContext(StoreContext)
+  const {
+    getTotalCartAmount,
+    token,
+    food_list,
+    cartItems,
+    url,
+    discountedTotal, // Get discountedTotal from context
+  } = useContext(StoreContext);
 
   const [data, setData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    street: "",
-    city: "",
-    state: "",
-    zipcode: "",
-    country: "",
-    phone: ""
-  })
+    firstName: '',
+    lastName: '',
+    email: '',
+    street: '',
+    city: '',
+    state: '',
+    zipcode: '',
+    country: '',
+    phone: '',
+  });
 
-  const [paymentMethod, setPaymentMethod] = useState("card")
+  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [couponCode, setCouponCode] = useState('');
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [couponValid, setCouponValid] = useState(true);
 
   const onCHangeHandler = (event) => {
     const name = event.target.name;
     const value = event.target.value;
-    setData(data => ({ ...data, [name]: value }))
-  }
+    setData((data) => ({ ...data, [name]: value }));
+  };
 
   const loadRazorpay = () => {
     return new Promise((resolve) => {
-      const script = document.createElement('script')
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js'
-      script.onload = () => resolve(true)
-      script.onerror = () => resolve(false)
-      document.body.appendChild(script)
-    })
-  }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
 
   const handleRazorpayPayment = async (orderData) => {
-    const isLoaded = await loadRazorpay()
-    
+    const isLoaded = await loadRazorpay();
+
     if (!isLoaded) {
-      alert('Razorpay SDK failed to load')
-      return
+      alert('Razorpay SDK failed to load');
+      return;
     }
 
     const options = {
-      key: "rzp_live_kYGlb6Srm9dDRe", // Replace with your Razorpay key
-      amount: (getTotalCartAmount() + 8) * 100,
-      currency: "INR",
-      name: "FOOD FUSION",
-      description: "Food Order Payment",
+      key: 'rzp_live_kYGlb6Srm9dDRe', // Replace with your Razorpay key
+      amount: discountedTotal * 100, // Use discountedTotal
+      currency: 'INR',
+      name: 'FOOD FUSION',
+      description: 'Food Order Payment',
       handler: async (response) => {
         try {
           const verifyPayment = await axios.post(
-            url + "/api/order/verify-payment",
+            url + '/api/order/verify-payment',
             {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
-              orderData: orderData
+              orderData: orderData,
             },
             { headers: { token } }
-          )
-          
+          );
+
           if (verifyPayment.data.success) {
-            navigate("/myorders")
+            navigate('/myorders');
           }
         } catch (error) {
-          alert("Payment verification failed")
+          alert('Payment verification failed');
         }
       },
       prefill: {
         name: `${data.firstName} ${data.lastName}`,
         email: data.email,
-        contact: data.phone
+        contact: data.phone,
       },
       theme: {
-        color: "#ff6b6b"
-      }
-    }
+        color: '#ff6b6b',
+      },
+    };
 
-    const paymentObject = new window.Razorpay(options)
-    paymentObject.open()
-  }
+    const paymentObject = new window.Razorpay(options);
+    paymentObject.open();
+  };
 
   const placeOrder = async (event) => {
     event.preventDefault();
@@ -92,65 +101,129 @@ const PlaceOrder = () => {
     food_list.map((item) => {
       if (cartItems[item._id] > 0) {
         let itemInfo = item;
-        itemInfo["quantity"] = cartItems[item._id];
-        orderItems.push(itemInfo)
+        itemInfo['quantity'] = cartItems[item._id];
+        orderItems.push(itemInfo);
       }
-    })
+    });
+
     let orderData = {
       address: data,
       items: orderItems,
-      amount: getTotalCartAmount() + 8,
-    }
-    if (paymentMethod === "cod") {
+      amount: discountedTotal, // Use discountedTotal
+      couponCode: couponCode, // Include coupon code
+    };
+
+    if (paymentMethod === 'cod') {
       try {
-        const response = await axios.post(
-          url + "/api/order/place", 
-          orderData, 
-          { headers: { token } }
-        )
+        const response = await axios.post(url + '/api/order/place', orderData, {
+          headers: { token },
+        });
         if (response.data.success) {
-          navigate("/myorders")
+          navigate('/myorders');
         } else {
-          alert("Error placing order")
+          alert('Error placing order');
         }
       } catch (error) {
-        alert("Error placing order")
+        alert('Error placing order');
       }
-    } else if (paymentMethod === "card") {
+    } else if (paymentMethod === 'card') {
       // Handle Razorpay payment
-      await handleRazorpayPayment(orderData)
+      await handleRazorpayPayment(orderData);
     }
-  }
+  };
 
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!token) {
-      navigate('/cart')
+      navigate('/cart');
     } else if (getTotalCartAmount() === 0) {
-      navigate('/cart')
+      navigate('/cart');
     }
-  }, [token])
+  }, [token]);
 
   return (
-    <form onSubmit={placeOrder} className='place-order'>
+    <form onSubmit={placeOrder} className="place-order">
       <div className="place-order-left">
         <p className="title">Delivery Information</p>
         <div className="multi-fields">
-          <input required name='firstName' onChange={onCHangeHandler} value={data.firstName} type="text" placeholder='First name' />
-          <input required name='lastName' onChange={onCHangeHandler} value={data.lastName} type="text" placeholder='Last name' />
+          <input
+            required
+            name="firstName"
+            onChange={onCHangeHandler}
+            value={data.firstName}
+            type="text"
+            placeholder="First name"
+          />
+          <input
+            required
+            name="lastName"
+            onChange={onCHangeHandler}
+            value={data.lastName}
+            type="text"
+            placeholder="Last name"
+          />
         </div>
-        <input required name='email' onChange={onCHangeHandler} value={data.email} type="email" placeholder='Email address' />
-        <input required name='street' onChange={onCHangeHandler} value={data.street} type="text" placeholder='Street' />
+        <input
+          required
+          name="email"
+          onChange={onCHangeHandler}
+          value={data.email}
+          type="email"
+          placeholder="Email address"
+        />
+        <input
+          required
+          name="street"
+          onChange={onCHangeHandler}
+          value={data.street}
+          type="text"
+          placeholder="Street"
+        />
         <div className="multi-fields">
-          <input required name='city' onChange={onCHangeHandler} value={data.city} type="text" placeholder='City' />
-          <input required name='state' onChange={onCHangeHandler} value={data.state} type="text" placeholder='State' />
+          <input
+            required
+            name="city"
+            onChange={onCHangeHandler}
+            value={data.city}
+            type="text"
+            placeholder="City"
+          />
+          <input
+            required
+            name="state"
+            onChange={onCHangeHandler}
+            value={data.state}
+            type="text"
+            placeholder="State"
+          />
         </div>
         <div className="multi-fields">
-          <input required name='zipcode' onChange={onCHangeHandler} value={data.zipcode} type="text" placeholder='Zip code' />
-          <input required name='country' onChange={onCHangeHandler} value={data.country} type="text" placeholder='Country' />
+          <input
+            required
+            name="zipcode"
+            onChange={onCHangeHandler}
+            value={data.zipcode}
+            type="text"
+            placeholder="Zip code"
+          />
+          <input
+            required
+            name="country"
+            onChange={onCHangeHandler}
+            value={data.country}
+            type="text"
+            placeholder="Country"
+          />
         </div>
-        <input required name='phone' onChange={onCHangeHandler} value={data.phone} type="tel" placeholder='Phone' />
+        <input
+          required
+          name="phone"
+          onChange={onCHangeHandler}
+          value={data.phone}
+          type="tel"
+          placeholder="Phone"
+        />
       </div>
       <div className="place-order-right">
         <div className="cart-total">
@@ -168,30 +241,30 @@ const PlaceOrder = () => {
             <hr />
             <div className="cart-total-details">
               <b>Total</b>
-              <b>₹{getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 8}</b>
+              <b>₹{discountedTotal.toFixed(2)}</b> {/* Use discountedTotal */}
             </div>
           </div>
-          <button type='submit'>
+          <button type="submit">
             {paymentMethod === 'cod' ? 'PLACE ORDER' : 'PROCEED TO PAYMENT'}
           </button>
           <div className="payment-options">
             <label className="payment-option">
-              <input 
-                type="radio" 
-                name="paymentMethod" 
-                value="cod" 
-                checked={paymentMethod === "cod"}
-                onChange={(e) => setPaymentMethod(e.target.value)} 
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="cod"
+                checked={paymentMethod === 'cod'}
+                onChange={(e) => setPaymentMethod(e.target.value)}
               />
               <span>Cash on Delivery</span>
             </label>
             <label className="payment-option">
-              <input 
-                type="radio" 
-                name="paymentMethod" 
-                value="card" 
-                checked={paymentMethod === "card"}
-                onChange={(e) => setPaymentMethod(e.target.value)} 
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="card"
+                checked={paymentMethod === 'card'}
+                onChange={(e) => setPaymentMethod(e.target.value)}
               />
               <span>Online Payment</span>
             </label>
@@ -199,7 +272,7 @@ const PlaceOrder = () => {
         </div>
       </div>
     </form>
-  )
-}
+  );
+};
 
-export default PlaceOrder
+export default PlaceOrder;

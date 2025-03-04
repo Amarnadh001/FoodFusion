@@ -8,6 +8,7 @@ const StoreContextProvider = (props) => {
     const url = "http://localhost:4000";
     const [token, setToken] = useState("");
     const [food_list, setFoodList] = useState([]);
+    const [discountedTotal, setDiscountedTotal] = useState(0); // Add discounted total state
 
     // Cart operations with error handling
     const addToCart = async (itemId) => {
@@ -130,7 +131,9 @@ const StoreContextProvider = (props) => {
         url,
         token,
         setToken,
-        handleInvalidToken
+        handleInvalidToken,
+        discountedTotal, // Add discountedTotal to context
+        setDiscountedTotal, // Add setDiscountedTotal to context
     };
 
     return (

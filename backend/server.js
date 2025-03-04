@@ -6,6 +6,7 @@ import foodRouter from "./routes/foodRoute.js";
 import orderRouter from "./routes/orderRoute.js";
 import userRouter from "./routes/userRoute.js";
 import authRoute from "./routes/authRoute.js";
+import couponRouter from "./routes/couponRoute.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -43,6 +44,7 @@ app.use("/api/user", userRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
 app.use("/api/auth", authRoute);
+app.use("/api/coupon", couponRouter); // Add the coupon routes
 
 // Error handling middleware
 app.use((err, req, res, next) => {
