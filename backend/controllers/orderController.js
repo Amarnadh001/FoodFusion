@@ -15,6 +15,22 @@ const placeOrder = async (req, res) => {
   try {
     let { userId, items, amount, address, paymentMethod, couponCode } = req.body;
 
+    // Validate required fields
+    if (!userId || !items || !amount || !address) {
+      return res.status(400).json({ success: false, message: "Missing required fields" });
+    }
+
+    // Validate address fields
+    const requiredAddressFields = ['firstName', 'lastName', 'email', 'street', 'city', 'state', 'zipcode', 'country', 'phone'];
+    const missingFields = requiredAddressFields.filter(field => !address[field]);
+    if (missingFields.length > 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Missing address fields", 
+        missingFields 
+      });
+    }
+
     let discountAmount = 0;
     if (couponCode) {
       const coupon = await Coupon.findOne({ code: couponCode, active: true });
@@ -36,6 +52,9 @@ const placeOrder = async (req, res) => {
     });
     await newOrder.save();
     await userModel.findByIdAndUpdate(userId, { cartData: {} });
+
+    // Save order date for aggregation
+    newOrder.date = new Date();
 
     const line_items = items.map((item) => ({
       price_data: {
@@ -69,7 +88,12 @@ const placeOrder = async (req, res) => {
     res.json({ success: true, session_url: session.url });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: "Error", error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: "Failed to place order", 
+      error: error.message,
+      details: error.name === 'ValidationError' ? 'Please check all required fields are filled correctly' : 'An error occurred while processing your order. Please try again.' 
+    });
   }
 };
 
@@ -86,7 +110,12 @@ const verifyOrder = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: "Error", error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: "Failed to place order", 
+      error: error.message,
+      details: error.name === 'ValidationError' ? 'Please check all required fields are filled correctly' : 'An error occurred while processing your order. Please try again.' 
+    });
   }
 };
 
@@ -97,7 +126,12 @@ const userOrders = async (req, res) => {
     res.json({ success: true, data: orders });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: "Error", error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: "Failed to place order", 
+      error: error.message,
+      details: error.name === 'ValidationError' ? 'Please check all required fields are filled correctly' : 'An error occurred while processing your order. Please try again.' 
+    });
   }
 };
 
@@ -108,7 +142,12 @@ const listOrders = async (req, res) => {
     res.json({ success: true, data: orders });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: "Error", error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: "Failed to place order", 
+      error: error.message,
+      details: error.name === 'ValidationError' ? 'Please check all required fields are filled correctly' : 'An error occurred while processing your order. Please try again.' 
+    });
   }
 };
 
@@ -119,7 +158,12 @@ const updateStatus = async (req, res) => {
     res.json({ success: true, message: "Status Updated" });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: "Error", error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: "Failed to place order", 
+      error: error.message,
+      details: error.name === 'ValidationError' ? 'Please check all required fields are filled correctly' : 'An error occurred while processing your order. Please try again.' 
+    });
   }
 };
 

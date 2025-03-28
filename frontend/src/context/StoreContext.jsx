@@ -5,7 +5,7 @@ export const StoreContext = createContext(null);
 
 const StoreContextProvider = (props) => {
     const [cartItems, setCartItems] = useState({});
-    const url = "https://foodfusion-backend-lfj9.onrender.com";
+    const url = "http://localhost:4000";
     const [token, setToken] = useState("");
     const [food_list, setFoodList] = useState([]);
     const [discountedTotal, setDiscountedTotal] = useState(0); // Add discounted total state

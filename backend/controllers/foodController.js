@@ -16,7 +16,7 @@ const addFood = async (req, res) => {
       description,
       price,
       category,
-      image: image_filename,
+      imageUrl: image_filename,
       ingredients: ingredientsArray,
       Advantages,
     });
@@ -44,7 +44,7 @@ const listFood = async (req, res) => {
 const removeFood = async (req, res) => {
   try {
     const food = await Food.findById(req.body.id);
-    fs.unlink(`uploads/${food.image}`, () => {});
+    fs.unlink(`uploads/${food.imageUrl}`, () => {});
 
     await Food.findByIdAndDelete(req.body.id);
     res.json({ success: true, message: "Food Removed" });

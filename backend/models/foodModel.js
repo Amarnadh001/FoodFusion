@@ -1,13 +1,37 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const foodSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  description: { type: String, required: true },
-  price: { type: Number, required: true },
-  category: { type: String, required: true },
-  image: { type: String, required: true },
-  ingredients: { type: [String], required: true }, // Array of ingredients
-  Advantages: { type: String, required: true }, // Advantages as a string
+    name: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        required: true
+    },
+    price: {
+        type: Number,
+        required: true
+    },
+    category: {
+        type: String,
+        required: true
+    },
+    imageUrl: {
+        type: String,
+        required: true
+    },
+    isAvailable: {
+        type: Boolean,
+        default: true
+    },
+    deletedAt: {
+        type: Date,
+        default: null
+    }
+}, {
+    timestamps: true
 });
 
-export default mongoose.model("Food", foodSchema);
+const Food = mongoose.model('Food', foodSchema);
+export default Food;

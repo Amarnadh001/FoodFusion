@@ -1,16 +1,36 @@
-import React from 'react'
-import { assets } from '../../assets/assets'
-import './Navbar.css'
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { assets } from '../../assets/assets';
+import './Navbar.css';
 
 const Navbar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Clear admin data from localStorage
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+    
+    // Show success message
+    toast.success('Logged out successfully');
+    
+    // Redirect to login page
+    navigate('/login');
+  };
+
   return (
     <div className='navbar'>
-      <img className='logo' src="https://yt3.ggpht.com/-VMlDBPP33Yw/AAAAAAAAAAI/AAAAAAAAAAA/N8i9Hxk-Ljs/s900-c-k-no-mo-rj-c0xffffff/photo.jpg" alt="" />
-      <img className='profile' src="https://static-00.iconduck.com/assets.00/profile-circle-icon-2048x2048-m8xmwvzx.png" alt="" />
-      
+      <img src={assets.logo} alt="logo" className='logo' />
+      <div className="nav-right">
+        <button onClick={handleLogout} className="logout-btn">
+          <img src={assets.logout_icon} alt="logout" />
+          <span>Logout</span>
+        </button>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;
 

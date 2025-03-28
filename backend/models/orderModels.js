@@ -6,7 +6,7 @@ const orderSchema = new mongoose.Schema({
     amount:{type:Number,required:true},
     address:{type:Object,required:true},
     status:{type:String,default:"Food Processing"},
-    date:{type:Date,default:Date.now()},
+    date:{type:Date,default:Date.now},
     payment:{type:Boolean,default:false},
     discount: { type: Number, default: 0 }, // Add discount field
     couponCode: { type: String }, // Add coupon code field
