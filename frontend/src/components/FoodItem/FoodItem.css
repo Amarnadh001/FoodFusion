@@ -73,6 +73,23 @@
     width: 70px;
   }
   
+  .food-item-name-rating .stars-container {
+    display: flex;
+  }
+  
+  .food-item-name-rating .star {
+    font-size: 16px;
+    margin-right: 2px;
+  }
+  
+  .food-item-name-rating .star.filled {
+    color: #ffc107;
+  }
+  
+  .food-item-name-rating .star.empty {
+    color: #ddd;
+  }
+  
   .food-item-desc {
     font-size: 14px;
     color: #555;

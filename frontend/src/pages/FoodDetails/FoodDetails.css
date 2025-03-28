@@ -45,9 +45,21 @@
   gap: 0.5rem;
 }
 
-.stars {
-  color: #fbbf24;
+.stars-container {
+  display: flex;
+}
+
+.star {
   font-size: 1.5rem;
+  margin-right: 2px;
+}
+
+.star.filled {
+  color: #fbbf24;
+}
+
+.star.empty {
+  color: #ddd;
 }
 
 .rating-count {

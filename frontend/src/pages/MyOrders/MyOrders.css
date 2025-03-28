@@ -44,4 +44,103 @@
     .my-orders-order button {
         font-size: 10px;
     }
+    
+    .order-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .review-btn {
+        margin-top: 5px;
+        font-size: 10px;
+    }
+}
+
+.order-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.review-btn {
+    background-color: #4caf50 !important;
+    color: white !important;
+    border: none;
+    padding: 5px 10px !important;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background-color 0.2s;
+}
+
+.review-btn:hover {
+    background-color: #388e3c !important;
+}
+
+.review-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.review-modal {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.close-review-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #777;
+}
+
+.close-review-btn:hover {
+    color: #333;
+}
+
+.status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.status.delivered span {
+    color: #4caf50;
+}
+
+.status.pending span {
+    color: #ff9800;
+}
+
+.status.processing span {
+    color: #2196f3;
+}
+
+.status.cancelled span {
+    color: #f44336;
 }

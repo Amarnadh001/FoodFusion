@@ -4,28 +4,78 @@ import Food from "../models/foodModel.js";
 // Add food item
 const addFood = async (req, res) => {
   try {
-    let image_filename = `${req.file.filename}`;
+    console.log("Adding food item with body:", req.body);
+    console.log("File object:", req.file);
+    
+    // Extract and parse all fields
+    const { 
+      name, 
+      description, 
+      price, 
+      category, 
+      ingredients, 
+      Advantages, 
+      isVegetarian, 
+      isSpicy, 
+      preparationTime, 
+      calories 
+    } = req.body;
 
-    const { name, description, price, category, ingredients, Advantages } = req.body;
-
-    // Convert ingredients from string to array
-    const ingredientsArray = ingredients.split(",").map((ingredient) => ingredient.trim());
-
-    const food = new Food({
+    // Debugging output
+    console.log("Parsed form data:", {
       name,
       description,
-      price,
+      price: typeof price,
       category,
-      imageUrl: image_filename,
-      ingredients: ingredientsArray,
-      Advantages,
+      ingredientsLength: ingredients ? ingredients.length : 0,
+      isVegetarian,
+      isSpicy
     });
 
-    await food.save();
-    res.json({ success: true, message: "Food Added", data: food });
+    // Convert ingredients from string to array
+    const ingredientsArray = ingredients ? ingredients.split(",").map((ingredient) => ingredient.trim()) : [];
+
+    // Create the food object with all fields except imageUrl
+    const foodData = {
+      name,
+      description,
+      price: Number(price),
+      category,
+      ingredients: ingredientsArray,
+      Advantages,
+      isVegetarian: isVegetarian === "true" || isVegetarian === true,
+      isSpicy: isSpicy === "true" || isSpicy === true,
+      preparationTime: preparationTime ? Number(preparationTime) : undefined,
+      calories: calories ? Number(calories) : undefined
+    };
+    
+    // Check if file exists and add imageUrl only if it does
+    if (req.file) {
+      foodData.imageUrl = req.file.filename;
+      console.log("Image uploaded successfully:", req.file.filename);
+    } else {
+      // Set a placeholder image name - the model requires imageUrl
+      foodData.imageUrl = "placeholder.jpg";
+      console.log("No image file uploaded, using placeholder image name");
+    }
+
+    console.log("Food object to save:", foodData);
+    const food = new Food(foodData);
+    const savedFood = await food.save();
+    console.log("Food item saved successfully with ID:", savedFood._id);
+    
+    res.json({ 
+      success: true, 
+      message: "Food Added Successfully", 
+      data: savedFood 
+    });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: "Error" });
+    console.log("Error adding food item:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Error adding food item", 
+      error: error.message 
+    });
   }
 };
 

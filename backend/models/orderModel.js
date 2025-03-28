@@ -24,6 +24,10 @@ const orderSchema = new mongoose.Schema({
         price: {
             type: Number,
             required: true
+        },
+        isReviewed: {
+            type: Boolean,
+            default: false
         }
     }],
     amount: {
@@ -32,7 +36,7 @@ const orderSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'processing', 'completed', 'cancelled'],
+        enum: ['pending', 'Food Processing', 'Your food is prepared', 'Out for delivery', 'Delivered', 'cancelled'],
         default: 'pending'
     },
     paymentStatus: {
@@ -51,6 +55,14 @@ const orderSchema = new mongoose.Schema({
     contactNumber: {
         type: String,
         required: true
+    },
+    address: {
+        type: Object,
+        required: true
+    },
+    allowReview: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

@@ -162,12 +162,15 @@ const LoginPopup = ({ setShowLogin }) => {
         setIsLoading(true);
 
         try {
+            console.log("Trying to login with:", data.email, "and password:", data.password.length, "chars");
+            
             const response = await axios.post(`${url}/api/user/login`, {
                 email: data.email,
                 password: data.password,
             });
 
             if (response.data.success) {
+                console.log("Login successful!");
                 setToken(response.data.token);
                 localStorage.setItem("token", response.data.token);
                 setShowLogin(false);
@@ -175,7 +178,12 @@ const LoginPopup = ({ setShowLogin }) => {
             }
         } catch (error) {
             console.error("Login error:", error.response?.data);
-            alert("❌ Login failed: " + (error.response?.data?.message || "Invalid credentials"));
+            // Show more details about the error
+            const errorMsg = error.response?.data?.message || 
+                             "Invalid credentials";
+            const status = error.response?.status || "Unknown";
+            
+            alert(`❌ Login failed (${status}): ${errorMsg}`);
         } finally {
             setIsLoading(false);
         }

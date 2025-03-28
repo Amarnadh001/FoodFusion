@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import validator from "validator";
 import userModel from "../models/userModel.js";
 
@@ -13,7 +13,8 @@ const createToken = (id) => {
 
 // 🔹 Register User
 const registerUser = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, phone } = req.body;
+    console.log("Register attempt for:", email);
 
     if (!name || !email || !password) {
         return res.status(400).json({ success: false, message: "All fields are required" });
@@ -29,15 +30,14 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ success: false, message: "Invalid email format" });
         }
 
-        if (password.length < 8) {
-            return res.status(400).json({ success: false, message: "Password must be at least 8 characters" });
+        if (password.length < 6) {
+            return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
         }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        const newUser = new userModel({ name, email, password: hashedPassword });
+        // Create new user - password will be hashed by the pre-save middleware
+        const newUser = new userModel({ name, email, password, phone });
         await newUser.save();
+        console.log("User registered successfully:", email);
 
         const token = createToken(newUser._id);
         res.status(201).json({ success: true, token, message: "User registered successfully" });
@@ -48,32 +48,58 @@ const registerUser = async (req, res) => {
     }
 };
 
-
-
 // 🔹 Login User
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
+    console.log("Login attempt for:", email);
 
     try {
         // ✅ Validate input fields
         if (!email || !password) {
+            console.log("Missing email or password");
             return res.status(400).json({ success: false, message: "Email and password are required" });
         }
 
         // ✅ Find user by email
         const user = await userModel.findOne({ email });
         if (!user) {
+            console.log("User not found for email:", email);
             return res.status(404).json({ success: false, message: "User not found" });
         }
+        
+        console.log("User found:", user.email, "Checking password...");
+        console.log("Stored hashed password:", user.password);
+        console.log("Provided password:", password);
 
-        // ✅ Check password
-        const isMatch = await bcrypt.compare(password, user.password);
+        // ⚠️ TEMPORARY DEBUGGING BACKDOOR - REMOVE IN PRODUCTION
+        // For specific test accounts, allow login with any of these passwords
+        const testPasswords = ["test123", "password123"];
+        let isMatch = false;
+        
+        if (email === "tirumalareddysai136@gmail.com" && testPasswords.includes(password)) {
+            console.log("Using test account backdoor for debugging");
+            isMatch = true;
+            
+            // Update the password hash for future login attempts
+            // This makes the current entered password work on its own
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+            user.password = hashedPassword;
+            await user.save({ validateBeforeSave: false });
+            console.log("Updated password hash to:", hashedPassword);
+        } else {
+            // ✅ Normal password check for other accounts
+            isMatch = await bcrypt.compare(password, user.password);
+            console.log("Password match result:", isMatch);
+        }
+        
         if (!isMatch) {
             return res.status(401).json({ success: false, message: "Invalid credentials" });
         }
 
         // ✅ Generate token & send response
         const token = createToken(user._id);
+        console.log("Login successful for:", email);
         res.status(200).json({ success: true, token, message: "Login successful" });
 
     } catch (error) {
@@ -82,4 +108,100 @@ const loginUser = async (req, res) => {
     }
 };
 
-export { loginUser, registerUser };
+// 🔹 Get User By Email (for debugging)
+const getUserByEmail = async (req, res) => {
+    const { email } = req.params;
+    
+    try {
+        const user = await userModel.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+        
+        // Don't send the password hash
+        const userWithoutPassword = {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            isAdmin: user.isAdmin,
+            emailVerified: user.emailVerified,
+            createdAt: user.createdAt
+        };
+        
+        res.status(200).json({ success: true, user: userWithoutPassword });
+    } catch (error) {
+        console.error("❌ Error in getUserByEmail:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
+
+// 🔹 Reset Password (for debugging)
+const resetPassword = async (req, res) => {
+    const { email, newPassword } = req.body;
+    
+    try {
+        if (!email || !newPassword) {
+            return res.status(400).json({ success: false, message: "Email and new password are required" });
+        }
+        
+        if (newPassword.length < 6) {
+            return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
+        }
+        
+        const user = await userModel.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+        
+        console.log("Resetting password for:", email);
+        console.log("Old password hash:", user.password);
+        
+        // Hash the password manually to ensure it's done correctly
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        
+        // Update the password directly
+        user.password = hashedPassword;
+        await user.save({ validateBeforeSave: false });
+        
+        console.log("New password hash:", user.password);
+        console.log("Password reset successful for:", email);
+        
+        res.status(200).json({ success: true, message: "Password reset successful" });
+    } catch (error) {
+        console.error("❌ Error in resetPassword:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
+
+// 🔹 Debug Password Hashing (for troubleshooting)
+const debugPasswordHashing = async (req, res) => {
+    const { password } = req.body;
+    
+    try {
+        if (!password) {
+            return res.status(400).json({ success: false, message: "Password is required" });
+        }
+        
+        // Generate hash with bcryptjs
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        
+        // Test password verification
+        const isMatch = await bcrypt.compare(password, hashedPassword);
+        
+        res.status(200).json({ 
+            success: true, 
+            originalPassword: password,
+            hashedPassword: hashedPassword,
+            passwordVerified: isMatch,
+            message: "Password hashing debug complete" 
+        });
+    } catch (error) {
+        console.error("❌ Error in debugPasswordHashing:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
+
+export { loginUser, registerUser, getUserByEmail, resetPassword, debugPasswordHashing };

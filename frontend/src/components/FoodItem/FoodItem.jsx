@@ -1,12 +1,32 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { assets } from "../../assets/assets";
 import { StoreContext } from "../../context/StoreContext";
+import axios from "axios";
 import "./FoodItem.css";
 
 const FoodItem = ({ id, name, price, description, image }) => {
   const { cartItems, addToCart, removeFromCart, url } = useContext(StoreContext);
   const navigate = useNavigate();
+  const [averageRating, setAverageRating] = useState(5); // Default to 5 stars
+
+  useEffect(() => {
+    // Fetch average rating for this food item
+    const fetchRating = async () => {
+      try {
+        const response = await axios.get(`${url}/api/review/food/${id}`);
+        if (response.data.success && response.data.data.length > 0) {
+          const reviews = response.data.data;
+          const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+          setAverageRating(totalRating / reviews.length);
+        }
+      } catch (error) {
+        console.error("Error fetching rating:", error);
+      }
+    };
+
+    fetchRating();
+  }, [id, url]);
 
   const handleFoodClick = () => {
     navigate(`/food/${id}`); // Navigate to the FoodDetails page
@@ -20,6 +40,22 @@ const FoodItem = ({ id, name, price, description, image }) => {
   const handleRemoveFromCart = (e) => {
     e.stopPropagation();
     removeFromCart(id);
+  };
+
+  // Render stars based on average rating
+  const renderStars = () => {
+    return (
+      <div className="stars-container">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span 
+            key={star} 
+            className={`star ${star <= averageRating ? 'filled' : 'empty'}`}
+          >
+            ★
+          </span>
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -56,7 +92,7 @@ const FoodItem = ({ id, name, price, description, image }) => {
       <div className="food-item-info" onClick={handleFoodClick}>
         <div className="food-item-name-rating">
           <p>{name}</p>
-          <img src={assets.rating_starts} alt="Rating" />
+          {renderStars()}
         </div>
         <p className="food-item-desc">{description}</p>
         <p className="food-item-price">₹{price}</p>

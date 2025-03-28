@@ -12,24 +12,24 @@ import Dashboard from './pages/Dashboard/Dashboard'
 import List from './pages/List/List'
 import AdminLogin from './pages/Login/AdminLogin'
 import Orders from './pages/Orders/Orders'
+import Reviews from './pages/Reviews/Reviews'
+import './App.css'
 
 const App = () => {
-  const url = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000"
-  
   const DashboardLayout = () => (
     <>
       <Navbar />
-      <hr />
       <div className="app-content">
         <Sidebar />
         <div className="main-content">
           <Routes>
-            <Route path="add" element={<Add url={url}/>} />
-            <Route path="list" element={<List url={url}/>} />
-            <Route path="orders" element={<Orders url={url}/>} />
-            <Route path="add-coupon" element={<AddCoupon url={url}/>} />
-            <Route path="list-coupons" element={<ListCoupons url={url}/>} />
-            <Route path="/" element={<Dashboard url={url}/>} />
+            <Route path="add" element={<Add />} />
+            <Route path="list" element={<List />} />
+            <Route path="orders" element={<Orders />} />
+            <Route path="add-coupon" element={<AddCoupon />} />
+            <Route path="list-coupons" element={<ListCoupons />} />
+            <Route path="reviews" element={<Reviews />} />
+            <Route path="/" element={<Dashboard />} />
           </Routes>
         </div>
       </div>
@@ -38,7 +38,7 @@ const App = () => {
 
   return (
     <>
-      <ToastContainer />
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
       <Routes>
         <Route path="/login" element={<AdminLogin />} />
         <Route path="/*" element={<PrivateRoute />}>

@@ -21,6 +21,15 @@ router.put('/profile', adminAuthMiddleware, updateAdminProfile);
 router.post('/reset-password', adminAuthMiddleware, resetPassword);
 router.post('/logout', adminAuthMiddleware, logout);
 
+// Simple test route for debugging dashboard access
+router.get('/dashboard-test', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Dashboard test endpoint is working',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Dashboard route
 router.get('/dashboard', adminAuthMiddleware, getDashboardData);
 

@@ -19,7 +19,32 @@ const foodSchema = new mongoose.Schema({
     },
     imageUrl: {
         type: String,
-        required: true
+        required: false,
+        default: "placeholder.jpg"
+    },
+    ingredients: {
+        type: [String],
+        default: []
+    },
+    Advantages: {
+        type: String,
+        default: ""
+    },
+    isVegetarian: {
+        type: Boolean,
+        default: false
+    },
+    isSpicy: {
+        type: Boolean,
+        default: false
+    },
+    preparationTime: {
+        type: Number,
+        default: 0
+    },
+    calories: {
+        type: Number,
+        default: 0
     },
     isAvailable: {
         type: Boolean,

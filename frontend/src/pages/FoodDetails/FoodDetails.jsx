@@ -1,6 +1,8 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
+import { StoreContext } from "../../context/StoreContext";
+import ReviewList from "../../components/ReviewList/ReviewList";
 import "./FoodDetails.css";
 
 const FoodDetails = () => {
@@ -8,11 +10,13 @@ const FoodDetails = () => {
   const [food, setFood] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { url } = useContext(StoreContext);
+  const [averageRating, setAverageRating] = useState(5); // Default to 5 stars
 
   useEffect(() => {
     const fetchFoodDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:4000/api/food/${id}`);
+        const response = await axios.get(`${url}/api/food/${id}`);
         if (response.data.success) {
           setFood(response.data.data);
         } else {
@@ -25,8 +29,39 @@ const FoodDetails = () => {
         setLoading(false);
       }
     };
+
+    const fetchRatings = async () => {
+      try {
+        const response = await axios.get(`${url}/api/review/food/${id}`);
+        if (response.data.success && response.data.data.length > 0) {
+          const reviews = response.data.data;
+          const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+          setAverageRating(totalRating / reviews.length);
+        }
+      } catch (error) {
+        console.error("Error fetching ratings:", error);
+      }
+    };
+
     fetchFoodDetails();
-  }, [id]);
+    fetchRatings();
+  }, [id, url]);
+
+  // Function to render stars based on rating
+  const renderStars = (rating) => {
+    return (
+      <div className="stars-container">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span 
+            key={star} 
+            className={`star ${star <= rating ? 'filled' : 'empty'}`}
+          >
+            ★
+          </span>
+        ))}
+      </div>
+    );
+  };
 
   if (loading) {
     return <div className="loading">Loading...</div>;
@@ -43,14 +78,14 @@ const FoodDetails = () => {
   return (
     <div className="food-details">
       <div className="food-header">
-        <img src={`http://localhost:4000/uploads/${food.image}`} alt={food.name} className="food-image" />
+        <img src={`${url}/uploads/${food.image}`} alt={food.name} className="food-image" />
         <div className="food-info">
           <h1>{food.name}</h1>
           <div className="price-rating">
-            <span className="price">${food.price}</span>
+            <span className="price">₹{food.price}</span>
             <div className="rating">
-              <span className="stars">★★★★★</span>
-              <span className="rating-count">(4.5)</span>
+              {renderStars(averageRating)}
+              <span className="rating-count">({averageRating.toFixed(1)})</span>
             </div>
           </div>
           <p className="description">{food.description}</p>
@@ -94,6 +129,9 @@ const FoodDetails = () => {
           <p className="benefits">{food.Advantages}</p>
         </div>
       </div>
+
+      {/* Reviews Section */}
+      <ReviewList foodId={id} />
     </div>
   );
 };

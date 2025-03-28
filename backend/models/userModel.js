@@ -17,10 +17,10 @@ const userSchema = new mongoose.Schema({
     },
     phone: {
         type: String,
-        required: [true, "Phone number is required"],
+        required: false, // Make phone optional for easier login
         validate: {
             validator: function (v) {
-                return /\d{10}/.test(v); // Ensure phone number is 10 digits
+                return !v || /\d{10}/.test(v); // Ensure phone number is 10 digits if provided
             },
             message: "Phone number must be 10 digits",
         },
@@ -44,15 +44,19 @@ const userSchema = new mongoose.Schema({
     },
 });
 
-// Add password hashing middleware
+// Ensure we're using bcryptjs consistently
 userSchema.pre('save', async function(next) {
+    // Only hash the password if it's been modified (or is new)
     if (!this.isModified('password')) return next();
     
     try {
+        console.log("Pre-save hook: Hashing password"); 
         const salt = await bcrypt.genSalt(10);
         this.password = await bcrypt.hash(this.password, salt);
+        console.log("Password hashed successfully");
         next();
     } catch (error) {
+        console.error("❌ Error hashing password:", error);
         next(error);
     }
 });

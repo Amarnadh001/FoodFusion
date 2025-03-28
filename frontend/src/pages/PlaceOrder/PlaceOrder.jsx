@@ -55,44 +55,66 @@ const PlaceOrder = () => {
       return;
     }
 
-    const options = {
-      key: 'rzp_live_kYGlb6Srm9dDRe', // Replace with your Razorpay key
-      amount: discountedTotal * 100, // Use discountedTotal
-      currency: 'INR',
-      name: 'FOOD FUSION',
-      description: 'Food Order Payment',
-      handler: async (response) => {
-        try {
-          const verifyPayment = await axios.post(
-            url + '/api/order/verify-payment',
-            {
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_signature: response.razorpay_signature,
-              orderData: orderData,
-            },
-            { headers: { token } }
-          );
+    try {
+      // First create a server-side order
+      const orderResponse = await axios.post(
+        url + '/api/order/place', 
+        orderData,
+        { headers: { token } }
+      );
+      
+      if (!orderResponse.data.success) {
+        alert('Failed to create order: ' + (orderResponse.data.message || 'Unknown error'));
+        return;
+      }
+      
+      const options = {
+        key: 'rzp_live_kYGlb6Srm9dDRe', // Replace with your Razorpay key
+        amount: discountedTotal * 100, // Use discountedTotal
+        currency: 'INR',
+        name: 'FOOD FUSION',
+        description: 'Food Order Payment',
+        order_id: orderResponse.data.orderId, // Get the order ID from the server
+        handler: async (response) => {
+          try {
+            const verifyResponse = await axios.post(
+              url + '/api/order/verify',
+              {
+                orderId: orderResponse.data.orderId,
+                success: "true",
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature
+              },
+              { headers: { token } }
+            );
 
-          if (verifyPayment.data.success) {
-            navigate('/myorders');
+            if (verifyResponse.data.success) {
+              navigate('/myorders');
+            } else {
+              alert('Payment verification failed: ' + (verifyResponse.data.message || 'Unknown error'));
+            }
+          } catch (error) {
+            console.error('Payment verification error:', error.response?.data || error);
+            alert('Payment verification failed: ' + (error.response?.data?.message || error.message || 'Unknown error'));
           }
-        } catch (error) {
-          alert('Payment verification failed');
-        }
-      },
-      prefill: {
-        name: `${data.firstName} ${data.lastName}`,
-        email: data.email,
-        contact: data.phone,
-      },
-      theme: {
-        color: '#ff6b6b',
-      },
-    };
+        },
+        prefill: {
+          name: `${data.firstName} ${data.lastName}`,
+          email: data.email,
+          contact: data.phone,
+        },
+        theme: {
+          color: '#ff6b6b',
+        },
+      };
 
-    const paymentObject = new window.Razorpay(options);
-    paymentObject.open();
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+    } catch (error) {
+      console.error('Error initializing payment:', error.response?.data || error);
+      alert('Error initializing payment: ' + (error.response?.data?.message || error.message || 'Unknown error'));
+    }
   };
 
   const placeOrder = async (event) => {
@@ -106,12 +128,17 @@ const PlaceOrder = () => {
       }
     });
 
+    // The userId is handled on the server through the token
+    // No need to include it in the request data
     let orderData = {
       address: data,
       items: orderItems,
       amount: discountedTotal, // Use discountedTotal
       couponCode: couponCode, // Include coupon code
+      paymentMethod: paymentMethod // Include payment method
     };
+    
+    console.log("Sending order data:", orderData);
 
     if (paymentMethod === 'cod') {
       try {
@@ -121,10 +148,11 @@ const PlaceOrder = () => {
         if (response.data.success) {
           navigate('/myorders');
         } else {
-          alert('Error placing order');
+          alert('Error placing order: ' + (response.data.message || 'Unknown error'));
         }
       } catch (error) {
-        alert('Error placing order');
+        console.error('Error placing order:', error.response?.data || error);
+        alert('Error placing order: ' + (error.response?.data?.message || error.message || 'Unknown error'));
       }
     } else if (paymentMethod === 'card') {
       // Handle Razorpay payment

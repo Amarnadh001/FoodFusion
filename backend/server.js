@@ -14,6 +14,7 @@ import couponRouter from "./routes/couponRoute.js";
 import foodRouter from "./routes/foodRoute.js";
 import orderRouter from "./routes/orderRoute.js";
 import userRouter from "./routes/userRoute.js";
+import reviewRouter from "./routes/reviewRoute.js";
 // Load environment variables
 dotenv.config();
 
@@ -28,23 +29,29 @@ const port = process.env.PORT || 4000;
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
-  'http://localhost:5174',
-  'http://localhost:5173'
+  'http://localhost:5175',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+  'http://127.0.0.1:5175',
+  'http://127.0.0.1:3000'
 ];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with no origin (like mobile apps, Postman, or curl requests)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    // Check if origin is allowed or if it's a development environment
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
       callback(null, true);
     } else {
+      console.warn(`CORS blocked request from origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "token"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "token", "Accept"],
   credentials: true,
   preflightContinue: false,
   optionsSuccessStatus: 204
@@ -70,11 +77,13 @@ app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
 app.use("/api/auth", authRoute);
 app.use("/api/coupon", couponRouter); // Add the coupon routes
-app.use("/api/admin", adminRouter);
-app.use("/api/admin", adminRoute);
+app.use("/api/review", reviewRouter); // Add the review routes
 
-// Update the admin routes configuration
-app.use("/api/admin", adminRouter);
+// Register admin routes properly
+// adminAuthRoute.js handles admin authentication (login)
+app.use("/api/admin", adminRouter);  
+// adminRoute.js handles protected admin routes (dashboard, profile, etc.)
+app.use("/api/admin", adminRoute);
 
 // Protected admin routes (require admin authentication)
 app.use("/api/admin/manage", adminAuthMiddleware, (req, res, next) => {
