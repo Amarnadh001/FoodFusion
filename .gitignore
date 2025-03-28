@@ -26,8 +26,5 @@ dist-ssr
 #mannual changes
 frontend/node_modules
 backend/node_modules
-.env
-.frontend/.env
-.backend/.env
 node_modules/
 backend/config/firebaseServiceAccount.json
