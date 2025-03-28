@@ -93,7 +93,18 @@ const Cart = () => {
             return (
               <div key={index}>
                 <div className="cart-items-title cart-items-item">
-                  <img src={`${url}/uploads/${item.image}`} alt={item.name} /> {/* Corrected image path */}
+                  <img 
+                    src={`${url}/uploads/${item.imageUrl || item.image}`} 
+                    alt={item.name}
+                    onError={(e) => {
+                      console.log(`Failed to load image: ${e.target.src}`);
+                      e.target.src = `${url}/uploads/placeholder.jpg`;
+                      e.target.onerror = () => {
+                        e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiM5OTkiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==";
+                        e.target.onerror = null; // Prevent infinite loop
+                      };
+                    }}
+                  /> 
                   <p>{item.name}</p>
                   <p>₹{item.price}</p>
                   <p>{cartItems[item._id]}</p>

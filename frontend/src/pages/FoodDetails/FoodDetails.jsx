@@ -78,7 +78,21 @@ const FoodDetails = () => {
   return (
     <div className="food-details">
       <div className="food-header">
-        <img src={`${url}/uploads/${food.image}`} alt={food.name} className="food-image" />
+        <img 
+          src={`${url}/uploads/${food.imageUrl || food.image}`} 
+          alt={food.name} 
+          className="food-image" 
+          onError={(e) => {
+            console.log(`Failed to load image: ${e.target.src}`);
+            // First try to load a placeholder image from the server
+            e.target.src = `${url}/uploads/placeholder.jpg`;
+            // If that fails, use a data URI as fallback
+            e.target.onerror = () => {
+              e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiM5OTkiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==";
+              e.target.onerror = null; // Prevent infinite loop
+            };
+          }}
+        />
         <div className="food-info">
           <h1>{food.name}</h1>
           <div className="price-rating">

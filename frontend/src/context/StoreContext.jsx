@@ -59,7 +59,19 @@ const StoreContextProvider = (props) => {
     const fetchFoodList = async () => {
         try {
             const response = await axios.get(`${url}/api/food/list`);
-            setFoodList(response.data.data);
+            // Process food data to ensure consistent image fields
+            const processedData = response.data.data.map(item => {
+                // If imageUrl exists but image doesn't, set image to imageUrl for backward compatibility
+                if (item.imageUrl && !item.image) {
+                    return { ...item, image: item.imageUrl };
+                }
+                // If image exists but imageUrl doesn't, set imageUrl to image
+                else if (item.image && !item.imageUrl) {
+                    return { ...item, imageUrl: item.image };
+                }
+                return item;
+            });
+            setFoodList(processedData);
         } catch (error) {
             console.error("Food list fetch error:", error);
         }

@@ -5,7 +5,7 @@ import { StoreContext } from "../../context/StoreContext";
 import axios from "axios";
 import "./FoodItem.css";
 
-const FoodItem = ({ id, name, price, description, image }) => {
+const FoodItem = ({ id, name, price, description, image, imageUrl }) => {
   const { cartItems, addToCart, removeFromCart, url } = useContext(StoreContext);
   const navigate = useNavigate();
   const [averageRating, setAverageRating] = useState(5); // Default to 5 stars
@@ -57,14 +57,27 @@ const FoodItem = ({ id, name, price, description, image }) => {
       </div>
     );
   };
+  
+  // Use either imageUrl or image, depending on which is available
+  const imagePath = imageUrl || image;
 
   return (
     <div className="food-item">
       <div className="food-item-img-container" onClick={handleFoodClick}>
         <img
-          src={`${url}/uploads/${image}`}
+          src={`${url}/uploads/${imagePath}`}
           alt={name}
           className="food-item-image"
+          onError={(e) => {
+            console.log(`Failed to load image: ${e.target.src}`);
+            // First try to load a placeholder image from the server
+            e.target.src = `${url}/uploads/placeholder.jpg`;
+            // If that fails, use a data URI as fallback
+            e.target.onerror = () => {
+              e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiM5OTkiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==";
+              e.target.onerror = null; // Prevent infinite loop
+            };
+          }}
         />
         {!cartItems[id] ? (
           <img

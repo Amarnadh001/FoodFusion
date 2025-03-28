@@ -16,6 +16,18 @@ const List = () => {
     priceRange: { min: "", max: "" }
   });
   
+  // Modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editItem, setEditItem] = useState(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    description: "",
+    price: "",
+    category: "",
+    isAvailable: true
+  });
+  const [newImage, setNewImage] = useState(null);
+  
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -59,6 +71,94 @@ const List = () => {
       } finally {
         setIsLoading(false);
       }
+    }
+  };
+  
+  const openEditModal = (item) => {
+    setEditItem(item);
+    setEditForm({
+      name: item.name,
+      description: item.description,
+      price: item.price,
+      category: item.category,
+      isAvailable: item.isAvailable !== false // default to true if not defined
+    });
+    setShowEditModal(true);
+  };
+  
+  const closeEditModal = () => {
+    setShowEditModal(false);
+    setEditItem(null);
+    setNewImage(null);
+  };
+  
+  const handleEditFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setEditForm({
+      ...editForm,
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
+  
+  const handleImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setNewImage(e.target.files[0]);
+    }
+  };
+  
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    
+    setIsLoading(true);
+    try {
+      // Create a form data object
+      const formData = new FormData();
+      formData.append('id', editItem._id);
+      formData.append('name', editForm.name);
+      formData.append('description', editForm.description);
+      formData.append('price', editForm.price);
+      formData.append('category', editForm.category);
+      formData.append('isAvailable', editForm.isAvailable);
+      
+      // Only append image if a new one was selected
+      if (newImage) {
+        formData.append('image', newImage);
+      }
+      
+      // Make API call to update the food item
+      const response = await api.post('/api/food/update', formData);
+      
+      if (response.data.success) {
+        toast.success("Food item updated successfully");
+        closeEditModal();
+        fetchList(); // Refresh the list
+      } else {
+        toast.error(response.data.message || "Error updating food item");
+      }
+    } catch (error) {
+      console.error("Error updating food item:", error);
+      toast.error("Failed to update food item");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const toggleAvailability = async (item) => {
+    try {
+      const response = await api.post('/api/food/toggle-availability', { 
+        id: item._id,
+        isAvailable: !item.isAvailable
+      });
+      
+      if (response.data.success) {
+        toast.success(`${item.name} is now ${!item.isAvailable ? 'available' : 'unavailable'}`);
+        fetchList(); // Refresh the list
+      } else {
+        toast.error(response.data.message || "Error updating availability");
+      }
+    } catch (error) {
+      console.error("Error toggling availability:", error);
+      toast.error("Failed to update availability");
     }
   };
 
@@ -239,6 +339,7 @@ const List = () => {
               <div className="list-cell">Name</div>
               <div className="list-cell">Category</div>
               <div className="list-cell">Price</div>
+              <div className="list-cell">Status</div>
               <div className="list-cell">Actions</div>
             </div>
             
@@ -275,7 +376,27 @@ const List = () => {
                     <span className="category-badge">{item.category}</span>
                   </div>
                   <div className="list-cell price-cell">₹{item.price}</div>
+                  <div className="list-cell">
+                    <span className={`status-badge ${item.isAvailable !== false ? 'available' : 'unavailable'}`}>
+                      {item.isAvailable !== false ? 'Available' : 'Unavailable'}
+                    </span>
+                  </div>
                   <div className="list-cell actions-cell">
+                    <button 
+                      className="action-btn edit-btn"
+                      onClick={() => openEditModal(item)}
+                      title="Edit item"
+                    >
+                      <i className="fa fa-edit"></i> Edit
+                    </button>
+                    <button 
+                      className="action-btn toggle-btn"
+                      onClick={() => toggleAvailability(item)}
+                      title={item.isAvailable !== false ? "Mark as unavailable" : "Mark as available"}
+                    >
+                      <i className={`fa fa-${item.isAvailable !== false ? 'times' : 'check'}`}></i> 
+                      {item.isAvailable !== false ? 'Mark Unavailable' : 'Mark Available'}
+                    </button>
                     <button 
                       className="action-btn delete-btn"
                       onClick={() => removeFood(item._id)}
@@ -328,6 +449,124 @@ const List = () => {
             </div>
           )}
         </>
+      )}
+      
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="modal-overlay">
+          <div className="edit-modal">
+            <div className="modal-header">
+              <h3>Edit Food Item</h3>
+              <button className="close-modal" onClick={closeEditModal}>×</button>
+            </div>
+            <form onSubmit={handleEditSubmit} className="edit-form">
+              <div className="form-group">
+                <label>Name</label>
+                <input 
+                  type="text" 
+                  name="name" 
+                  value={editForm.name} 
+                  onChange={handleEditFormChange}
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Description</label>
+                <textarea 
+                  name="description" 
+                  value={editForm.description} 
+                  onChange={handleEditFormChange}
+                  required
+                ></textarea>
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Category</label>
+                  <select 
+                    name="category" 
+                    value={editForm.category} 
+                    onChange={handleEditFormChange}
+                    required
+                  >
+                    {categories.filter(c => c !== "All").map((category, index) => (
+                      <option key={index} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label>Price (₹)</label>
+                  <input 
+                    type="number" 
+                    name="price" 
+                    value={editForm.price} 
+                    onChange={handleEditFormChange}
+                    required
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label>Current Image</label>
+                <div className="current-image-container">
+                  <img 
+                    src={`${API_URL}/uploads/${editItem.imageUrl}`} 
+                    alt={editItem.name}
+                    className="current-image"
+                    onError={(e) => {
+                      e.target.src = `${API_URL}/uploads/placeholder.jpg`;
+                      e.target.onerror = () => {
+                        e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiM5OTkiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==";
+                      };
+                    }}
+                  />
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label>New Image (optional)</label>
+                <input 
+                  type="file" 
+                  name="image" 
+                  onChange={handleImageChange}
+                  accept="image/*"
+                />
+                {newImage && (
+                  <div className="new-image-preview">
+                    <img 
+                      src={URL.createObjectURL(newImage)} 
+                      alt="New image preview" 
+                    />
+                  </div>
+                )}
+              </div>
+              
+              <div className="form-group checkbox-group">
+                <input 
+                  type="checkbox" 
+                  name="isAvailable" 
+                  id="isAvailable"
+                  checked={editForm.isAvailable} 
+                  onChange={handleEditFormChange}
+                />
+                <label htmlFor="isAvailable">Item is available</label>
+              </div>
+              
+              <div className="form-actions">
+                <button type="button" className="cancel-btn" onClick={closeEditModal}>Cancel</button>
+                <button type="submit" className="save-btn" disabled={isLoading}>
+                  {isLoading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

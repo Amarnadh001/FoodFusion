@@ -119,4 +119,100 @@ const getFoodById = async (req, res) => {
   }
 };
 
-export { addFood, getFoodById, listFood, removeFood };
+// Update food item
+const updateFood = async (req, res) => {
+  try {
+    console.log("Updating food item with body:", req.body);
+    console.log("File object:", req.file);
+    
+    const { id, name, description, price, category, isAvailable } = req.body;
+    
+    // Find the food item
+    const food = await Food.findById(id);
+    if (!food) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Food item not found" 
+      });
+    }
+    
+    // Update basic fields
+    food.name = name;
+    food.description = description;
+    food.price = Number(price);
+    food.category = category;
+    food.isAvailable = isAvailable === 'true' || isAvailable === true;
+    
+    // Update image if a new one was uploaded
+    if (req.file) {
+      // Delete old image if it exists and isn't a placeholder
+      if (food.imageUrl && food.imageUrl !== 'placeholder.jpg') {
+        try {
+          fs.unlink(`uploads/${food.imageUrl}`, () => {
+            console.log(`Deleted old image: ${food.imageUrl}`);
+          });
+        } catch (error) {
+          console.log("Error deleting old image:", error);
+        }
+      }
+      
+      // Set new image
+      food.imageUrl = req.file.filename;
+      console.log("Updated image to:", req.file.filename);
+    }
+    
+    // Save the updated food item
+    const updatedFood = await food.save();
+    console.log("Food item updated successfully with ID:", updatedFood._id);
+    
+    res.json({
+      success: true,
+      message: "Food item updated successfully",
+      data: updatedFood
+    });
+    
+  } catch (error) {
+    console.log("Error updating food item:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating food item",
+      error: error.message
+    });
+  }
+};
+
+// Toggle food item availability
+const toggleAvailability = async (req, res) => {
+  try {
+    const { id, isAvailable } = req.body;
+    
+    // Find and update the food item
+    const food = await Food.findById(id);
+    if (!food) {
+      return res.status(404).json({
+        success: false,
+        message: "Food item not found"
+      });
+    }
+    
+    // Update availability
+    food.isAvailable = isAvailable;
+    await food.save();
+    
+    res.json({
+      success: true,
+      message: `Food item is now ${isAvailable ? 'available' : 'unavailable'}`,
+      data: food
+    });
+    
+  } catch (error) {
+    console.log("Error toggling availability:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating availability",
+      error: error.message
+    });
+  }
+};
+
+export { addFood, getFoodById, listFood, removeFood, updateFood, toggleAvailability };
