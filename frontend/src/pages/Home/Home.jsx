@@ -3,6 +3,7 @@ import AppDownload from '../../components/AppDownload/AppDownload';
 import ExploreMenu from '../../components/ExploreMenu/ExploreMenu';
 import FoodDisplay from '../../components/FoodDisplay/FoodDisplay';
 import Header from '../../components/Header/Header';
+import TodaySpecial from '../../components/TodaySpecial/TodaySpecial';
 import './Home.css';
 
 const Home = () => {
@@ -34,6 +35,7 @@ const Home = () => {
   return (
     <div>
       <Header />
+      <TodaySpecial />
       {/* Add a single search input */}
       <input
         type="text"

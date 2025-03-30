@@ -50,9 +50,21 @@ const foodSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    isSpecial: {
+        type: Boolean,
+        default: false
+    },
+    isAvailable: {
+        type: Boolean,
+        default: true
+    },
     deletedAt: {
         type: Date,
         default: null
+    },
+    isSpecial: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

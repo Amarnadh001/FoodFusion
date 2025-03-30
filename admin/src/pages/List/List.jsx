@@ -81,7 +81,8 @@ const List = () => {
       description: item.description,
       price: item.price,
       category: item.category,
-      isAvailable: item.isAvailable !== false // default to true if not defined
+      isAvailable: item.isAvailable !== false, // default to true if not defined
+      isSpecial: item.isSpecial || false
     });
     setShowEditModal(true);
   };
@@ -98,6 +99,24 @@ const List = () => {
       ...editForm,
       [name]: type === 'checkbox' ? checked : value
     });
+  };
+
+  const toggleSpecial = async (foodId, currentStatus) => {
+    setIsLoading(true);
+    try {
+      const response = await api.post("/api/food/toggle-special", { id: foodId, isSpecial: !currentStatus });
+      if (response.data.success) {
+        toast.success("Today's Special status updated successfully");
+        await fetchList();
+      } else {
+        toast.error(response.data.message || "Error updating Today's Special status");
+      }
+    } catch (error) {
+      console.error("Error updating Today's Special status:", error);
+      toast.error("Failed to update Today's Special status");
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const handleImageChange = (e) => {
@@ -403,6 +422,12 @@ const List = () => {
                       title="Remove item"
                     >
                       <i className="fa fa-trash"></i> Remove
+                    </button>
+                    <button
+                      onClick={() => toggleSpecial(item._id, item.isSpecial)}
+                      className={`special-btn ${item.isSpecial ? 'active' : ''}`}
+                    >
+                      {item.isSpecial ? "Remove from Special" : "Add to Special"}
                     </button>
                   </div>
                 </div>

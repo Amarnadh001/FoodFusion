@@ -1,6 +1,38 @@
 import fs from "fs";
 import Food from "../models/foodModel.js";
 
+// Toggle food item's special status
+export const toggleSpecial = async (req, res) => {
+  try {
+    const { id, isSpecial } = req.body;
+    const food = await Food.findByIdAndUpdate(
+      id,
+      { isSpecial },
+      { new: true }
+    );
+
+    if (!food) {
+      return res.status(404).json({
+        success: false,
+        message: "Food item not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Special status updated successfully",
+      data: food
+    });
+  } catch (error) {
+    console.error("Error toggling special status:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating special status"
+    });
+  }
+};
+
+
 // Add food item
 const addFood = async (req, res) => {
   try {
@@ -181,6 +213,39 @@ const updateFood = async (req, res) => {
   }
 };
 
+// Toggle Today's Special status
+const toggleSpecial = async (req, res) => {
+  try {
+    const { id, isSpecial } = req.body;
+    
+    // Find and update the food item
+    const food = await Food.findById(id);
+    if (!food) {
+      return res.status(404).json({
+        success: false,
+        message: "Food item not found"
+      });
+    }
+    
+    // Update special status
+    food.isSpecial = isSpecial;
+    await food.save();
+    
+    res.json({
+      success: true,
+      message: "Food special status updated successfully",
+      data: food
+    });
+  } catch (error) {
+    console.log("Error updating food special status:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating food special status",
+      error: error.message
+    });
+  }
+};
+
 // Toggle food item availability
 const toggleAvailability = async (req, res) => {
   try {
@@ -215,4 +280,4 @@ const toggleAvailability = async (req, res) => {
   }
 };
 
-export { addFood, getFoodById, listFood, removeFood, updateFood, toggleAvailability };
+export { addFood, getFoodById, listFood, removeFood, updateFood, toggleAvailability, toggleSpecial };

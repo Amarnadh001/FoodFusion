@@ -81,8 +81,8 @@
   }
 
 .list-container {
-  padding: 2rem;
-  max-width: 1400px;
+  padding: 1.5rem;
+  max-width: 1200px;
   margin: 0 auto;
   background: #f8f9fa;
   min-height: 100vh;
@@ -90,12 +90,12 @@
 }
 
 .list-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .list-header h2 {
   color: #2c3e50;
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
   position: relative;
@@ -107,15 +107,15 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 60px;
-  height: 4px;
+  width: 50px;
+  height: 3px;
   background: #3498db;
   border-radius: 2px;
 }
 
 .list-subtitle {
   color: #64748b;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 400;
 }
 
@@ -273,39 +273,50 @@
 
 .list-table-row {
   display: grid;
-  grid-template-columns: 100px 2fr 1fr 1fr 1fr;
-  padding: 1rem;
+  grid-template-columns: 80px 1.5fr 1fr 0.8fr 0.8fr;
+  padding: 0.75rem;
   border-bottom: 1px solid #e2e8f0;
   align-items: center;
   transition: background-color 0.2s;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
-.list-table-row:hover {
-  background-color: #f8fafc;
+.list-table-header {
+  display: grid;
+  grid-template-columns: 70px 1.2fr 0.8fr 0.6fr 0.8fr;
+  padding: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+  align-items: center;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
-.list-table-row:last-child {
-  border-bottom: none;
+.list-table-header {
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
 }
 
 .food-image {
-  width: 60px;
-  height: 60px;
+  width: 40px;
+  height: 40px;
   object-fit: cover;
-  border-radius: 0.5rem;
+  border-radius: 0.375rem;
   border: 1px solid #e2e8f0;
 }
 
 .food-name {
+  font-size: 0.85rem;
   font-weight: 500;
   color: #334155;
   margin-bottom: 0.25rem;
 }
 
 .food-description {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: #64748b;
   line-height: 1.4;
+  max-width: 200px;
 }
 
 .category-badge {
@@ -361,6 +372,35 @@
 
 .toggle-btn:hover {
   background-color: #d35400;
+}
+
+.special-btn {
+  padding: 6px 12px;
+  margin-left: 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #ffd700;
+  color: #333;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.special-btn:hover {
+  background-color: #ffed4a;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.special-btn.active {
+  background-color: #ff6b6b;
+  color: white;
+}
+
+.special-btn.active:hover {
+  background-color: #ff5252;
 }
 
 .delete-btn {
