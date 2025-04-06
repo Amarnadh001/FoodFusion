@@ -31,16 +31,16 @@
 
 .today-special-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.8rem;
 }
 
 .today-special .food-item {
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
   transition: transform 0.3s ease;
-  aspect-ratio: 1;
+  aspect-ratio: 3/4;
 }
 
 .today-special .food-item:hover {
@@ -86,6 +86,7 @@
   }
   .today-special-list {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.5rem;
   }
 }
 

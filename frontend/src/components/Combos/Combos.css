@@ -8,17 +8,17 @@
 
 .combos-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.8rem;
   padding: 0;
 }
 
 .combos .food-item {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
   transition: transform 0.3s ease;
-  aspect-ratio: 1;
+  aspect-ratio: 3/4;
 }
 
 .combos .food-item:hover {
@@ -46,7 +46,7 @@
     margin: 0.5rem 0;
   }
   .combos-list {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 0.5rem;
   }
   .combos .food-item {
