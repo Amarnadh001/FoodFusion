@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Create axios instance with base URL
-const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+const API_URL = import.meta.env.VITE_BACKEND_URL || "https://foodfusion-backend-lfj9.onrender.com";
 
 console.log('API URL configured as:', API_URL);
 

@@ -19,7 +19,7 @@ const ORDER_STATUS_FLOW = {
 
 // Place user order for frontend
 const placeOrder = async (req, res) => {
-  const frontend_url = process.env.FRONTEND_URL || "http://localhost:5174";
+  const frontend_url = process.env.FRONTEND_URL || "https://foodfusion-admin.onrender.com";
 
   try {
     let { items, amount, address, paymentMethod, couponCode, deliveryAddress, contactNumber } = req.body;

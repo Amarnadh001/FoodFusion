@@ -15,4 +15,4 @@ export const assets ={
     logout_icon: '/path/to/logout-icon.svg' // Add your logout icon path
 }
 
-export const url = 'http://localhost:4000'
+export const url = 'https://foodfusion-backend-lfj9.onrender.com'

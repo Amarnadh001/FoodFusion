@@ -28,8 +28,8 @@ const port = process.env.PORT || 4000;
 
 // Enhanced CORS configuration with proper origin handling
 const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:5174',
+  'https://foodfusion-frontend.onrender.com',
+  'https://foodfusion-admin.onrender.com',
   'http://localhost:5175',
   'http://localhost:3000',
   'http://127.0.0.1:5173',
