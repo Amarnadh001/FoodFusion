@@ -23,6 +23,10 @@ const Sidebar = () => {
                 <img src={assets.order_icon} alt="" />
                 <p>Orders</p>
             </NavLink>
+            <NavLink to='/cancellation-requests' className="sidebar-option">
+                <img src={assets.order_icon} alt="" />
+                <p>Cancellation Requests</p>
+            </NavLink>
             <NavLink to='/add-coupon' className="sidebar-option">
                 <img src={assets.add_icon} alt="" />
                 <p>Add Coupon</p>
@@ -34,6 +38,10 @@ const Sidebar = () => {
             <NavLink to='/reviews' className="sidebar-option">
                 <img src={assets.order_icon} alt="" />
                 <p>Reviews</p>
+            </NavLink>
+            <NavLink to='/combo-management' className="sidebar-option">
+                <img src={assets.add_icon} alt="" />
+                <p>Combo Management</p>
             </NavLink>
         </div>
       

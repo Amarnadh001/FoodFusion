@@ -1,4 +1,4 @@
-import orderModel from "../models/orderModels.js";
+import Order from "../models/orderModel.js";
 import foodModel from "../models/foodModel.js";
 
 export const getDashboardData = async (req, res) => {
@@ -10,7 +10,7 @@ export const getDashboardData = async (req, res) => {
     let foodCount = 0;
     
     try {
-      orderCount = await orderModel.countDocuments();
+      orderCount = await Order.countDocuments();
       foodCount = await foodModel.countDocuments();
       console.log(`Found ${orderCount} orders and ${foodCount} food items.`);
     } catch (dbError) {
@@ -72,14 +72,14 @@ export const getDashboardData = async (req, res) => {
     console.log("- One year ago: ", oneYearAgo);
     
     // TROUBLESHOOTING: Let's first check if we can get any orders at all without date filtering
-    const allOrders = await orderModel.find().limit(5).lean();
+    const allOrders = await Order.find().limit(5).lean();
     console.log("Sample orders:", allOrders.length);
     if (allOrders.length > 0) {
       console.log("Sample order dates:", allOrders.map(order => order.createdAt));
     }
     
     // Get all orders first to see what data we have
-    const orderStats = await orderModel.aggregate([
+    const orderStats = await Order.aggregate([
       { $group: {
         _id: null,
         totalOrders: { $sum: 1 },
@@ -224,7 +224,7 @@ export const getDashboardData = async (req, res) => {
 
 const getDailySalesData = async (startDate) => {
   try {
-    const dailyData = await orderModel.aggregate([
+    const dailyData = await Order.aggregate([
       { $match: { createdAt: { $gte: startDate } } },
       { $group: {
         _id: { 

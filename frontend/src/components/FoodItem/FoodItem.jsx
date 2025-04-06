@@ -5,10 +5,11 @@ import { StoreContext } from "../../context/StoreContext";
 import axios from "axios";
 import "./FoodItem.css";
 
-const FoodItem = ({ id, name, price, description, image, imageUrl }) => {
+const FoodItem = ({ id, name, price, description, image, imageUrl, isCombo }) => {
   const { cartItems, addToCart, removeFromCart, url } = useContext(StoreContext);
   const navigate = useNavigate();
   const [averageRating, setAverageRating] = useState(5); // Default to 5 stars
+  const [showComboDetails, setShowComboDetails] = useState(false);
 
   useEffect(() => {
     // Fetch average rating for this food item
@@ -29,16 +30,22 @@ const FoodItem = ({ id, name, price, description, image, imageUrl }) => {
   }, [id, url]);
 
   const handleFoodClick = () => {
-    navigate(`/food/${id}`); // Navigate to the FoodDetails page
+    if (isCombo) {
+      setShowComboDetails(!showComboDetails);
+    } else {
+      navigate(`/food/${id}`); // Navigate to the FoodDetails page
+    }
   };
 
   const handleAddToCart = (e) => {
-    e.stopPropagation();
+    e.preventDefault(); // Prevent default behavior
+    e.stopPropagation(); // Stop event from bubbling up
     addToCart(id);
   };
 
   const handleRemoveFromCart = (e) => {
-    e.stopPropagation();
+    e.preventDefault(); // Prevent default behavior
+    e.stopPropagation(); // Stop event from bubbling up
     removeFromCart(id);
   };
 
@@ -63,9 +70,15 @@ const FoodItem = ({ id, name, price, description, image, imageUrl }) => {
 
   return (
     <div className="food-item">
+      {isCombo && description && (
+        <div className={`combo-description ${showComboDetails ? 'visible' : ''}`}>
+          <h3>Combo Details</h3>
+          <p>{description}</p>
+        </div>
+      )}
       <div className="food-item-img-container" onClick={handleFoodClick}>
         <img
-          src={`${url}/uploads/${imagePath}`}
+          src={imagePath && (imagePath.startsWith('http') || imagePath.startsWith('data:')) ? imagePath : `${url}/uploads/${imagePath || 'placeholder.jpg'}`}
           alt={name}
           className="food-item-image"
           onError={(e) => {
@@ -79,28 +92,30 @@ const FoodItem = ({ id, name, price, description, image, imageUrl }) => {
             };
           }}
         />
-        {!cartItems[id] ? (
-          <img
-            className="add"
-            onClick={handleAddToCart}
-            src={assets.add_icon_white}
-            alt="Add to Cart"
-          />
-        ) : (
-          <div className="food-item-counter">
+        <div className={`cart-controls ${isCombo ? 'combo' : ''}`}>
+          {!cartItems[id] ? (
             <img
-              onClick={handleRemoveFromCart}
-              src={assets.remove_icon_red}
-              alt="Remove from Cart"
-            />
-            <p>{cartItems[id]}</p>
-            <img
+              className="add"
               onClick={handleAddToCart}
-              src={assets.add_icon_green}
+              src={assets.add_icon_white}
               alt="Add to Cart"
             />
-          </div>
-        )}
+          ) : (
+            <div className="food-item-counter">
+              <img
+                onClick={handleRemoveFromCart}
+                src={assets.remove_icon_red}
+                alt="Remove from Cart"
+              />
+              <p>{cartItems[id]}</p>
+              <img
+                onClick={handleAddToCart}
+                src={assets.add_icon_green}
+                alt="Add to Cart"
+              />
+            </div>
+          )}
+        </div>
       </div>
       <div className="food-item-info" onClick={handleFoodClick}>
         <div className="food-item-name-rating">

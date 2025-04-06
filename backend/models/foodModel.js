@@ -54,17 +54,13 @@ const foodSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    isAvailable: {
+    isCombo: {
         type: Boolean,
-        default: true
+        default: false
     },
     deletedAt: {
         type: Date,
         default: null
-    },
-    isSpecial: {
-        type: Boolean,
-        default: false
     }
 }, {
     timestamps: true

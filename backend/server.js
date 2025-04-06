@@ -15,6 +15,7 @@ import foodRouter from "./routes/foodRoute.js";
 import orderRouter from "./routes/orderRoute.js";
 import userRouter from "./routes/userRoute.js";
 import reviewRouter from "./routes/reviewRoute.js";
+import comboRouter from "./routes/comboRoute.js";
 // Load environment variables
 dotenv.config();
 
@@ -78,6 +79,7 @@ app.use("/api/order", orderRouter);
 app.use("/api/auth", authRoute);
 app.use("/api/coupon", couponRouter); // Add the coupon routes
 app.use("/api/review", reviewRouter); // Add the review routes
+app.use("/api/combo", comboRouter); // Add the combo routes
 
 // Register admin routes properly
 // adminAuthRoute.js handles admin authentication (login)

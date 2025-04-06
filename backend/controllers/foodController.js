@@ -1,36 +1,7 @@
 import fs from "fs";
 import Food from "../models/foodModel.js";
 
-// Toggle food item's special status
-export const toggleSpecial = async (req, res) => {
-  try {
-    const { id, isSpecial } = req.body;
-    const food = await Food.findByIdAndUpdate(
-      id,
-      { isSpecial },
-      { new: true }
-    );
 
-    if (!food) {
-      return res.status(404).json({
-        success: false,
-        message: "Food item not found"
-      });
-    }
-
-    res.json({
-      success: true,
-      message: "Special status updated successfully",
-      data: food
-    });
-  } catch (error) {
-    console.error("Error toggling special status:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error updating special status"
-    });
-  }
-};
 
 
 // Add food item
@@ -114,7 +85,11 @@ const addFood = async (req, res) => {
 // List all food items
 const listFood = async (req, res) => {
   try {
-    const foods = await Food.find({});
+    // Explicitly exclude combo items and ensure they're not shown in menu
+    const foods = await Food.find({
+      isCombo: false,
+      deletedAt: null
+    });
     res.json({ success: true, data: foods });
   } catch (error) {
     console.log(error);
@@ -280,4 +255,56 @@ const toggleAvailability = async (req, res) => {
   }
 };
 
-export { addFood, getFoodById, listFood, removeFood, updateFood, toggleAvailability, toggleSpecial };
+// Toggle Combo status
+const toggleCombo = async (req, res) => {
+  try {
+    const { id, isCombo } = req.body;
+    
+    // Find and update the food item
+    const food = await Food.findById(id);
+    if (!food) {
+      return res.status(404).json({
+        success: false,
+        message: "Food item not found"
+      });
+    }
+
+    // If trying to remove from combo, just update
+    if (!isCombo) {
+      food.isCombo = false;
+      await food.save();
+      return res.json({
+        success: true,
+        message: "Item removed from combo successfully"
+      });
+    }
+
+    // If adding to combo, check current combo count
+    const currentComboCount = await Food.countDocuments({ isCombo: true });
+    
+    // Only allow adding if there's at least one other item in combo
+    if (currentComboCount >= 1 || isCombo === false) {
+      food.isCombo = isCombo;
+      await food.save();
+      res.json({
+        success: true,
+        message: "Combo status updated successfully"
+      });
+    } else {
+      res.json({
+        success: false,
+        message: "A combo must have at least 2 items. Please add another item first."
+      });
+    }
+    
+  } catch (error) {
+    console.log("Error updating combo status:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating combo status",
+      error: error.message
+    });
+  }
+};
+
+export { addFood, getFoodById, listFood, removeFood, updateFood, toggleAvailability, toggleSpecial, toggleCombo };

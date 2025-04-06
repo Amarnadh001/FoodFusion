@@ -1,16 +1,36 @@
 import express from "express"
-import { listOrders, placeOrder, updateOrderStatus, userOrders, verifyOrder } from "../controllers/orderController.js"
+import { 
+  listOrders, 
+  placeOrder, 
+  updateOrderStatus, 
+  userOrders, 
+  verifyOrder,
+  requestCancellation,
+  handleCancellationRequest,
+  getCancellationRequests,
+  trackOrder,
+  cancelOrder,
+  getOrderStatus
+} from "../controllers/orderController.js"
 import adminAuthMiddleware from "../middleware/adminAuth.js";
 import authMiddleware from "../middleware/auth.js";
-import orderModel from "../models/orderModels.js";
+import Order from "../models/orderModel.js";
 
 const router = express.Router();
 
 // User orders Routes
 router.post("/place", authMiddleware, placeOrder);
-router.post("/verify", verifyOrder);
-router.post("/status", updateOrderStatus);
+router.post("/status", authMiddleware, updateOrderStatus);
 router.post("/userorders", authMiddleware, userOrders);
+router.post("/verify", authMiddleware, verifyOrder);
+router.post("/track/:orderId", authMiddleware, trackOrder);
+router.get("/track-status/:orderId", authMiddleware, getOrderStatus);
+router.post("/cancel", authMiddleware, cancelOrder);
+
+// Cancellation Routes
+router.post("/cancel-request", authMiddleware, requestCancellation);
+router.post("/handle-cancellation", adminAuthMiddleware, handleCancellationRequest);
+router.get("/cancellation-requests", adminAuthMiddleware, getCancellationRequests);
 
 // Admin Routes
 router.get("/list", adminAuthMiddleware, listOrders);
@@ -19,7 +39,7 @@ router.get("/list", adminAuthMiddleware, listOrders);
 router.get("/fix-delivered-orders", adminAuthMiddleware, async (req, res) => {
     try {
         // Find all delivered orders that don't have allowReview set
-        const deliveredOrders = await orderModel.find({ 
+        const deliveredOrders = await Order.find({ 
             status: "Delivered", 
             allowReview: { $ne: true } 
         });
@@ -59,6 +79,41 @@ router.get("/fix-delivered-orders", adminAuthMiddleware, async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Failed to fix delivered orders"
+        });
+    }
+});
+
+// Add debug route to check tracking
+router.get("/track-test/:orderId", async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        console.log("Track test route called with orderId:", orderId);
+        
+        const order = await Order.findById(orderId);
+        
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found"
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: "Order found",
+            data: {
+                orderId: order._id,
+                status: order.status,
+                allowReview: order.allowReview,
+                items: order.items.length
+            }
+        });
+    } catch (error) {
+        console.error("Track test error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Error in test tracking",
+            error: error.message
         });
     }
 });

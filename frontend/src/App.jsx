@@ -9,6 +9,7 @@ import PlaceOrder from "./pages/PlaceOrder/PlaceOrder";
 import Verify from "./pages/Verify/Verify";
 import MyOrders from "./pages/MyOrders/MyOrders";
 import FoodDetails from "./pages/FoodDetails/FoodDetails"; // Import the FoodDetails component
+import ReviewPage from "./pages/ReviewPage/ReviewPage"; // Add ReviewPage import
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false);
@@ -25,6 +26,7 @@ const App = () => {
           <Route path="/verify" element={<Verify />} />
           <Route path="/myorders" element={<MyOrders />} />
           <Route path="/food/:id" element={<FoodDetails />} /> {/* Add this route */}
+          <Route path="/review/:foodId/:orderId" element={<ReviewPage />} /> {/* Add this route */}
         </Routes>
       </div>
       <Footer />

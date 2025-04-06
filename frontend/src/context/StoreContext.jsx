@@ -1,14 +1,26 @@
 import axios from "axios";
 import { createContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const StoreContext = createContext(null);
 
 const StoreContextProvider = (props) => {
+    const navigate = useNavigate();
     const [cartItems, setCartItems] = useState({});
     const url = "http://localhost:4000";
     const [token, setToken] = useState("");
+    const [userId, setUserId] = useState("");
     const [food_list, setFoodList] = useState([]);
+    const [combos, setCombos] = useState([]);
     const [discountedTotal, setDiscountedTotal] = useState(0); // Add discounted total state
+
+    // Helper function to process image URLs
+    const processImageUrl = (imageUrl) => {
+        if (!imageUrl) return '/placeholder.jpg'; // Default placeholder
+        if (imageUrl.startsWith('http')) return imageUrl; // Already a full URL
+        if (imageUrl.startsWith('/uploads')) return `${url}${imageUrl}`; // Relative path starting with /uploads
+        return `${url}/uploads/${imageUrl}`; // Regular relative path
+    };
 
     // Cart operations with error handling
     const addToCart = async (itemId) => {
@@ -16,16 +28,17 @@ const StoreContextProvider = (props) => {
         newCart[itemId] = (newCart[itemId] || 0) + 1;
         setCartItems(newCart);
 
-        if (token) {
+        if (token && userId) {
             try {
-                await axios.post(`${url}/api/cart/add`, { itemId }, {
-                    headers: { token }, // Include the token in the request headers
-                });
+                await axios.post(`${url}/api/cart/add`, 
+                    { itemId, userId }, 
+                    { headers: { token } }
+                );
             } catch (error) {
                 console.error("Add to cart error:", error.response?.data);
 
                 if (error.response?.status === 401) {
-                    handleInvalidToken(); // Handle token expiration or invalid token
+                    handleInvalidToken();
                 }
             }
         }
@@ -37,9 +50,12 @@ const StoreContextProvider = (props) => {
             newCart[itemId] -= 1;
             setCartItems(newCart);
 
-            if (token) {
+            if (token && userId) {
                 try {
-                    await axios.post(`${url}/api/cart/remove`, { itemId }, { headers: { token } });
+                    await axios.post(`${url}/api/cart/remove`, 
+                        { itemId, userId }, 
+                        { headers: { token } }
+                    );
                 } catch (error) {
                     console.error("Remove from cart error:", error.response?.data);
                 }
@@ -47,57 +63,95 @@ const StoreContextProvider = (props) => {
         }
     };
 
-    // Calculate total with null safety
+    // Calculate total with null safety, including both food items and combos
     const getTotalCartAmount = () => {
-        return food_list.reduce((total, item) => {
+        let total = 0;
+        
+        // Calculate total for regular food items
+        food_list.forEach(item => {
             const quantity = cartItems[item._id] || 0;
-            return total + (item.price || 0) * quantity;
-        }, 0);
+            total += (item.price || 0) * quantity;
+        });
+
+        // Calculate total for combo items
+        combos.forEach(combo => {
+            const quantity = cartItems[combo._id] || 0;
+            total += (combo.price || 0) * quantity;
+        });
+
+        return total;
     };
 
     // Data fetching functions
     const fetchFoodList = async () => {
         try {
-            const response = await axios.get(`${url}/api/food/list`);
-            // Process food data to ensure consistent image fields
-            const processedData = response.data.data.map(item => {
-                // If imageUrl exists but image doesn't, set image to imageUrl for backward compatibility
-                if (item.imageUrl && !item.image) {
-                    return { ...item, image: item.imageUrl };
-                }
-                // If image exists but imageUrl doesn't, set imageUrl to image
-                else if (item.image && !item.imageUrl) {
-                    return { ...item, imageUrl: item.image };
-                }
-                return item;
-            });
-            setFoodList(processedData);
+            const [foodResponse, comboResponse] = await Promise.all([
+                axios.get(`${url}/api/food/list`),
+                axios.get(`${url}/api/combo/list`)
+            ]);
+
+            // Process food data
+            const processedFoodData = foodResponse.data.data.map(item => ({
+                ...item,
+                image: processImageUrl(item.image),
+                imageUrl: processImageUrl(item.imageUrl),
+                isCombo: false
+            }));
+
+            // Process combo data with food items
+            const processedComboData = comboResponse.data.data.map(combo => ({
+                ...combo,
+                image: processImageUrl(combo.image),
+                imageUrl: processImageUrl(combo.imageUrl),
+                isCombo: true,
+                foodItems: combo.foodItems.map(item => ({
+                    ...item,
+                    image: processImageUrl(item.image),
+                    imageUrl: processImageUrl(item.imageUrl)
+                }))
+            }));
+
+            setFoodList(processedFoodData);
+            setCombos(processedComboData);
         } catch (error) {
             console.error("Food list fetch error:", error);
         }
     };
 
     const loadCartData = async () => {
-        const token = localStorage.getItem("token");
+        const currentToken = localStorage.getItem("token");
+        const currentUserId = localStorage.getItem("userId");
 
-        if (!token) {
-            console.error("No token found. Redirecting to login...");
-            navigate("/login");
+        if (!currentToken || !currentUserId) {
+            console.error("No token or userId found");
+            setCartItems({});
             return;
         }
 
         try {
-            const response = await axios.post(`${url}/api/cart/get`, {}, {
-                headers: { token }, // Include the token in the request headers
-            });
-            setCartItems(response.data.cartData || {});
+            const response = await axios.post(`${url}/api/cart/get`, 
+                { userId: currentUserId },
+                {
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'token': currentToken
+                    }
+                }
+            );
+            
+            if (response.data && response.data.success && response.data.cartData) {
+                setCartItems(response.data.cartData);
+            } else {
+                console.error("Invalid cart data response:", response.data);
+                setCartItems({});
+            }
         } catch (error) {
             console.error("Cart load error:", error.response?.data || error.message);
 
             if (error.response?.status === 401) {
-                handleInvalidToken(); // Handle token expiration or invalid token
+                handleInvalidToken();
             } else {
-                alert("Failed to load cart data. Please try again later.");
+                setCartItems({});
             }
         }
     };
@@ -105,7 +159,9 @@ const StoreContextProvider = (props) => {
     // Token management
     const handleInvalidToken = () => {
         setToken("");
+        setUserId("");
         localStorage.removeItem("token");
+        localStorage.removeItem("userId");
         setCartItems({});
     };
 
@@ -117,9 +173,11 @@ const StoreContextProvider = (props) => {
     useEffect(() => {
         const initializeAuth = async () => {
             const storedToken = localStorage.getItem("token");
-            if (storedToken) {
+            const storedUserId = localStorage.getItem("userId");
+            if (storedToken && storedUserId) {
                 setToken(storedToken);
-                await loadCartData(storedToken);
+                setUserId(storedUserId);
+                await loadCartData();
             }
         };
         initializeAuth();
@@ -128,9 +186,15 @@ const StoreContextProvider = (props) => {
     useEffect(() => {
         if (token) {
             localStorage.setItem("token", token);
-            loadCartData(token);
+            loadCartData();
         }
     }, [token]);
+
+    useEffect(() => {
+        if (userId) {
+            localStorage.setItem("userId", userId);
+        }
+    }, [userId]);
 
     // Context value
     const contextValue = {
@@ -143,9 +207,12 @@ const StoreContextProvider = (props) => {
         url,
         token,
         setToken,
+        userId,
+        setUserId,
         handleInvalidToken,
-        discountedTotal, // Add discountedTotal to context
-        setDiscountedTotal, // Add setDiscountedTotal to context
+        discountedTotal,
+        setDiscountedTotal,
+        combos
     };
 
     return (

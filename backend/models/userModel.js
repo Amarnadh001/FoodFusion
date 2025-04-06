@@ -51,9 +51,27 @@ userSchema.pre('save', async function(next) {
     
     try {
         console.log("Pre-save hook: Hashing password"); 
+        console.log("Original password length:", this.password?.length);
+        console.log("Original password type:", typeof this.password);
+        
+        // Ensure password is a string and trim any whitespace
+        const passwordToHash = String(this.password).trim();
+        console.log("Cleaned password length:", passwordToHash.length);
+        
         const salt = await bcrypt.genSalt(10);
-        this.password = await bcrypt.hash(this.password, salt);
+        this.password = await bcrypt.hash(passwordToHash, salt);
+        
         console.log("Password hashed successfully");
+        console.log("Hashed password length:", this.password?.length);
+        
+        // Verify the hash works
+        const isMatch = await bcrypt.compare(passwordToHash, this.password);
+        console.log("Hash verification test:", isMatch);
+        
+        if (!isMatch) {
+            console.error("❌ Hash verification failed during save!");
+        }
+        
         next();
     } catch (error) {
         console.error("❌ Error hashing password:", error);

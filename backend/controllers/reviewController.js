@@ -1,5 +1,5 @@
 import Review from '../models/reviewModel.js';
-import orderModel from '../models/orderModels.js';
+import Order from '../models/orderModel.js';
 import userModel from '../models/userModel.js';
 
 // Create a new review
@@ -35,7 +35,7 @@ export const createReview = async (req, res) => {
         }
         
         // Check if order exists and belongs to user
-        const order = await orderModel.findOne({ _id: orderId, userId });
+        const order = await Order.findOne({ _id: orderId, userId });
         console.log("Found order:", order ? order._id : "No order found");
         
         if (!order) {
@@ -242,7 +242,7 @@ export const deleteReview = async (req, res) => {
         }
         
         // Optionally, update the order to mark item as not reviewed
-        await orderModel.updateOne(
+        await Order.updateOne(
             { "_id": review.orderId, "items.foodId": review.foodId },
             { $set: { "items.$.isReviewed": false } }
         );
@@ -293,7 +293,7 @@ export const getReviewableItems = async (req, res) => {
         
         // If orderId is provided, get reviewable items for that specific order
         if (orderId) {
-            const order = await orderModel.findOne({ _id: orderId, userId });
+            const order = await Order.findOne({ _id: orderId, userId });
             
             if (!order) {
                 return res.status(404).json({
@@ -326,7 +326,7 @@ export const getReviewableItems = async (req, res) => {
         } 
         // If no orderId is provided, get all reviewable items from all delivered orders
         else {
-            const orders = await orderModel.find({ 
+            const orders = await Order.find({ 
                 userId, 
                 status: 'Delivered',
                 allowReview: true

@@ -36,13 +36,17 @@ const orderSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'Food Processing', 'Your food is prepared', 'Out for delivery', 'Delivered', 'cancelled'],
+        enum: ['pending', 'Food Processing', 'Your food is prepared', 'Out for delivery', 'Delivered', 'cancelled', 'cancellation_requested'],
         default: 'pending'
     },
     paymentStatus: {
         type: String,
         enum: ['pending', 'completed', 'failed'],
         default: 'pending'
+    },
+    payment: {
+        type: Boolean,
+        default: false
     },
     paymentMethod: {
         type: String,
@@ -63,6 +67,33 @@ const orderSchema = new mongoose.Schema({
     allowReview: {
         type: Boolean,
         default: false
+    },
+    discount: {
+        type: Number,
+        default: 0
+    },
+    couponCode: {
+        type: String,
+        default: ''
+    },
+    cancellationRequest: {
+        reason: {
+            type: String,
+            default: null
+        },
+        requestedAt: {
+            type: Date,
+            default: null
+        },
+        status: {
+            type: String,
+            enum: ['pending', 'approved', 'rejected', null],
+            default: null
+        },
+        adminResponse: {
+            type: String,
+            default: null
+        }
     }
 }, {
     timestamps: true

@@ -141,6 +141,17 @@
   transition: all 0.2s;
 }
 
+.order-item select.status-cancelled {
+  background-color: #ffebee;
+  color: #d32f2f;
+  border-color: #d32f2f;
+  cursor: not-allowed;
+}
+
+.order-item select.status-cancelled:disabled {
+  opacity: 1;
+}
+
 .order-item select:hover {
   border-color: #e63e3e;
 }

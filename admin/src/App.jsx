@@ -13,6 +13,8 @@ import List from './pages/List/List'
 import AdminLogin from './pages/Login/AdminLogin'
 import Orders from './pages/Orders/Orders'
 import Reviews from './pages/Reviews/Reviews'
+import ComboManagement from './pages/ComboManagement/ComboManagement'
+import CancellationRequests from './pages/CancellationRequests/CancellationRequests'
 import './App.css'
 
 const App = () => {
@@ -26,9 +28,11 @@ const App = () => {
             <Route path="add" element={<Add />} />
             <Route path="list" element={<List />} />
             <Route path="orders" element={<Orders />} />
+            <Route path="cancellation-requests" element={<CancellationRequests />} />
             <Route path="add-coupon" element={<AddCoupon />} />
             <Route path="list-coupons" element={<ListCoupons />} />
             <Route path="reviews" element={<Reviews />} />
+            <Route path="combo-management" element={<ComboManagement />} />
             <Route path="/" element={<Dashboard />} />
           </Routes>
         </div>

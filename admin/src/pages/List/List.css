@@ -374,33 +374,29 @@
   background-color: #d35400;
 }
 
-.special-btn {
-  padding: 6px 12px;
-  margin-left: 8px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.special-toggle, .combo-toggle {
   background-color: #ffd700;
   color: #333;
-  font-weight: 500;
-  font-size: 0.85rem;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.special-btn:hover {
+.special-toggle:hover, .combo-toggle:hover {
   background-color: #ffed4a;
-  transform: translateY(-1px);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 }
 
-.special-btn.active {
-  background-color: #ff6b6b;
+.special-toggle.active {
+  background-color: #ff8c00;
   color: white;
 }
 
-.special-btn.active:hover {
-  background-color: #ff5252;
+.combo-toggle.active {
+  background-color: #4CAF50;
+  color: white;
 }
 
 .delete-btn {

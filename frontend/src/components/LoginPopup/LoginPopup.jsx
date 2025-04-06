@@ -6,7 +6,7 @@ import { StoreContext } from "../../context/StoreContext";
 import "./LoginPopup.css";
 
 const LoginPopup = ({ setShowLogin }) => {
-    const { url, setToken } = useContext(StoreContext);
+    const { url, setToken, setUserId } = useContext(StoreContext);
     const navigate = useNavigate();
 
     const [currState, setCurrState] = useState("Login");
@@ -106,21 +106,60 @@ const LoginPopup = ({ setShowLogin }) => {
         }
     };
 
-    const createPassword = async () => {
+    const handleLogin = async (event) => {
+        event.preventDefault();
         if (isLoading) return;
         setIsLoading(true);
 
-        if (!data.name?.trim()) {
-            alert("❌ Please enter your full name.");
-            setIsLoading(false);
-            return;
-        }
+        try {
+            console.log("Trying to login with:", data.email);
+            console.log("Password length:", data.password?.length);
+            
+            // Clean the password by trimming any whitespace
+            const cleanPassword = data.password.trim();
+            console.log("Cleaned password length:", cleanPassword.length);
+            
+            const response = await axios.post(`${url}/api/user/login`, {
+                email: data.email.trim(),
+                password: cleanPassword,
+            });
 
-        if (!data.password || data.password.length < 6) {
-            alert("❌ Password must be at least 6 characters.");
+            if (response.data.success) {
+                console.log("Login successful!");
+                
+                // Store token in both context and localStorage
+                const token = response.data.token;
+                setToken(token);
+                localStorage.setItem("token", token);
+                
+                // Store userId in both context and localStorage
+                if (response.data.userId) {
+                    const userId = response.data.userId;
+                    setUserId(userId);
+                    localStorage.setItem("userId", userId);
+                    console.log("Stored userId:", userId);
+                } else {
+                    console.warn("No userId received from login response");
+                }
+                
+                setShowLogin(false);
+                
+                // Reload the page to refresh the state
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error("Login error:", error.response?.data);
+            const errorMsg = error.response?.data?.message || "Invalid credentials";
+            const status = error.response?.status || "Unknown";
+            alert(`❌ Login failed (${status}): ${errorMsg}`);
+        } finally {
             setIsLoading(false);
-            return;
         }
+    };
+
+    const handleRegister = async () => {
+        if (isLoading) return;
+        setIsLoading(true);
 
         try {
             const payload = {
@@ -133,15 +172,24 @@ const LoginPopup = ({ setShowLogin }) => {
             const response = await axios.post(`${url}/api/auth/register`, payload);
 
             if (response.data.success) {
-                // ✅ Save token to context and local storage
-                setToken(response.data.token);
-                localStorage.setItem("token", response.data.token);
+                // Store token in both context and localStorage
+                const token = response.data.token;
+                setToken(token);
+                localStorage.setItem("token", token);
+                
+                // Store userId in both context and localStorage
+                if (response.data.userId) {
+                    const userId = response.data.userId;
+                    setUserId(userId);
+                    localStorage.setItem("userId", userId);
+                    console.log("Stored userId:", userId);
+                }
 
-                // ✅ Close login popup and redirect
+                // Close login popup and reload page
                 setShowLogin(false);
-                navigate("/");
+                window.location.reload();
 
-                // ✅ Show success message
+                // Show success message
                 alert("✅ Registration successful! You are now logged in.");
             } else {
                 alert(response.data.message);
@@ -151,39 +199,6 @@ const LoginPopup = ({ setShowLogin }) => {
             alert(
                 `❌ Registration failed: ${error.response?.data?.message || "Please check your details"}`
             );
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleLogin = async (event) => {
-        event.preventDefault();
-        if (isLoading) return;
-        setIsLoading(true);
-
-        try {
-            console.log("Trying to login with:", data.email, "and password:", data.password.length, "chars");
-            
-            const response = await axios.post(`${url}/api/user/login`, {
-                email: data.email,
-                password: data.password,
-            });
-
-            if (response.data.success) {
-                console.log("Login successful!");
-                setToken(response.data.token);
-                localStorage.setItem("token", response.data.token);
-                setShowLogin(false);
-                navigate("/");
-            }
-        } catch (error) {
-            console.error("Login error:", error.response?.data);
-            // Show more details about the error
-            const errorMsg = error.response?.data?.message || 
-                             "Invalid credentials";
-            const status = error.response?.status || "Unknown";
-            
-            alert(`❌ Login failed (${status}): ${errorMsg}`);
         } finally {
             setIsLoading(false);
         }
@@ -228,7 +243,7 @@ const LoginPopup = ({ setShowLogin }) => {
                             <>
                                 <input name="password" onChange={onChangeHandler} value={data.password}
                                     type="password" placeholder="Create Password (min 6 chars)" required />
-                                <button type="button" onClick={createPassword} disabled={isLoading}>
+                                <button type="button" onClick={handleRegister} disabled={isLoading}>
                                     {isLoading ? "Creating..." : "Create Account"}
                                 </button>
                             </>
@@ -253,18 +268,19 @@ const LoginPopup = ({ setShowLogin }) => {
                     <p>By continuing, I agree to the Terms of Use & Privacy Policy.</p>
                 </div>
 
-                {currState === "Login" ? (
-                    <p>Create a new account? <span onClick={() => {
-                        setCurrState("Sign Up");
-                        setStep("inputDetails");
-                        setData({ name: "", email: "", phone: "", password: "", otp: "" });
-                    }}>Sign Up</span></p>
-                ) : (
-                    <p>Already have an account? <span onClick={() => {
-                        setCurrState("Login");
-                        setData({ name: "", email: "", phone: "", password: "", otp: "" });
-                    }}>Login</span></p>
-                )}
+                <div className="login-popup-footer">
+                    {currState === "Login" ? (
+                        <>
+                            <p>Create a new account?</p>
+                            <span onClick={() => setCurrState("Sign Up")}>Sign Up</span>
+                        </>
+                    ) : (
+                        <>
+                            <p>Already have an account?</p>
+                            <span onClick={() => setCurrState("Login")}>Login</span>
+                        </>
+                    )}
+                </div>
             </form>
         </div>
     );

@@ -138,6 +138,7 @@ const Orders = () => {
           <option value="Your food is prepared">Food Prepared</option>
           <option value="Out for delivery">Out for Delivery</option>
           <option value="Delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
         </select>
 
         <input 
@@ -221,12 +222,14 @@ const Orders = () => {
               <select 
                 onChange={(event) => statusHandler(event, order._id)} 
                 value={order.status} 
-                disabled={loading}
+                disabled={loading || order.status === 'cancelled'}
+                className={order.status === 'cancelled' ? 'status-cancelled' : ''}
               >
                 <option value="Food Processing">Food Processing</option>
                 <option value="Your food is prepared">Food Prepared</option>
                 <option value="Out for delivery">Out for Delivery</option>
                 <option value="Delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
               </select>
             </div>
           ))}

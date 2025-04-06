@@ -6,6 +6,23 @@ import api from "../../utils/api";
 // Get the API base URL from wherever it's defined in your app
 const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
+const toggleCombo = async (foodId, currentStatus) => {
+  try {
+    const response = await api.post("/api/food/toggle-combo", { id: foodId, isCombo: !currentStatus });
+    if (response.data.success) {
+      toast.success(response.data.message);
+      return true;
+    } else {
+      toast.warning(response.data.message || "Error updating combo status");
+      return false;
+    }
+  } catch (error) {
+    console.error("Error updating combo status:", error);
+    toast.error("Failed to update combo status");
+    return false;
+  }
+};
+
 const List = () => {
   const [list, setList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
@@ -428,6 +445,19 @@ const List = () => {
                       className={`special-btn ${item.isSpecial ? 'active' : ''}`}
                     >
                       {item.isSpecial ? "Remove from Special" : "Add to Special"}
+                    </button>
+                    <button
+                      onClick={async () => {
+                        setIsLoading(true);
+                        const success = await toggleCombo(item._id, item.isCombo);
+                        if (success) {
+                          await fetchList();
+                        }
+                        setIsLoading(false);
+                      }}
+                      className={`combo-btn ${item.isCombo ? 'active' : ''}`}
+                    >
+                      {item.isCombo ? "Remove from Combo" : "Add to Combo"}
                     </button>
                   </div>
                 </div>

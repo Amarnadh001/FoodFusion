@@ -52,6 +52,7 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
     console.log("Login attempt for:", email);
+    console.log("Password length:", password?.length);
 
     try {
         // ✅ Validate input fields
@@ -67,44 +68,67 @@ const loginUser = async (req, res) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
         
-        console.log("User found:", user.email, "Checking password...");
-        console.log("Stored hashed password:", user.password);
-        console.log("Provided password:", password);
+        console.log("User found:", user.email);
+        console.log("User ID:", user._id);
+        console.log("Stored password hash:", user.password);
+        console.log("Attempting password comparison...");
 
-        // ⚠️ TEMPORARY DEBUGGING BACKDOOR - REMOVE IN PRODUCTION
-        // For specific test accounts, allow login with any of these passwords
-        const testPasswords = ["test123", "password123"];
+        // ✅ Compare password with proper error handling
         let isMatch = false;
-        
-        if (email === "tirumalareddysai136@gmail.com" && testPasswords.includes(password)) {
-            console.log("Using test account backdoor for debugging");
-            isMatch = true;
+        try {
+            // Convert password to string and trim any whitespace
+            const cleanPassword = String(password).trim();
+            console.log("Cleaned password length:", cleanPassword.length);
             
-            // Update the password hash for future login attempts
-            // This makes the current entered password work on its own
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
-            user.password = hashedPassword;
-            await user.save({ validateBeforeSave: false });
-            console.log("Updated password hash to:", hashedPassword);
-        } else {
-            // ✅ Normal password check for other accounts
-            isMatch = await bcrypt.compare(password, user.password);
-            console.log("Password match result:", isMatch);
+            isMatch = await bcrypt.compare(cleanPassword, user.password);
+            console.log("Password comparison result:", isMatch);
+            
+            // If password doesn't match, try to debug the issue
+            if (!isMatch) {
+                console.log("Password verification failed. Debugging...");
+                
+                // Try to hash the input password to see if it matches the stored hash
+                const salt = await bcrypt.genSalt(10);
+                const hashedInput = await bcrypt.hash(cleanPassword, salt);
+                console.log("New hash for input password:", hashedInput);
+                
+                // Check if the hashes are different
+                if (hashedInput !== user.password) {
+                    console.log("Hash comparison shows different hashes");
+                }
+            }
+        } catch (compareError) {
+            console.error("Password comparison error:", compareError);
+            return res.status(500).json({ 
+                success: false, 
+                message: "Error verifying credentials" 
+            });
         }
         
         if (!isMatch) {
-            return res.status(401).json({ success: false, message: "Invalid credentials" });
+            console.log("Password verification failed");
+            return res.status(401).json({ 
+                success: false, 
+                message: "Invalid credentials" 
+            });
         }
 
         // ✅ Generate token & send response
         const token = createToken(user._id);
         console.log("Login successful for:", email);
-        res.status(200).json({ success: true, token, message: "Login successful" });
+        res.status(200).json({ 
+            success: true, 
+            token, 
+            userId: user._id,
+            message: "Login successful" 
+        });
 
     } catch (error) {
         console.error("❌ Error in loginUser:", error);
-        res.status(500).json({ success: false, message: "Internal Server Error" });
+        res.status(500).json({ 
+            success: false, 
+            message: "Internal Server Error" 
+        });
     }
 };
 
@@ -204,4 +228,60 @@ const debugPasswordHashing = async (req, res) => {
     }
 };
 
-export { loginUser, registerUser, getUserByEmail, resetPassword, debugPasswordHashing };
+// 🔹 Debug Password (for troubleshooting)
+const debugPassword = async (req, res) => {
+    const { email, password } = req.body;
+    
+    try {
+        if (!email || !password) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Email and password are required" 
+            });
+        }
+        
+        console.log("Debug password request for:", email);
+        console.log("Password length:", password?.length);
+        
+        // Find user
+        const user = await userModel.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "User not found" 
+            });
+        }
+        
+        console.log("User found:", user.email);
+        console.log("Stored password hash:", user.password);
+        
+        // Clean password
+        const cleanPassword = String(password).trim();
+        console.log("Cleaned password length:", cleanPassword.length);
+        
+        // Try to hash the password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(cleanPassword, salt);
+        console.log("New hash for input password:", hashedPassword);
+        
+        // Compare with stored hash
+        const isMatch = await bcrypt.compare(cleanPassword, user.password);
+        console.log("Password comparison result:", isMatch);
+        
+        // Return debug information
+        res.status(200).json({ 
+            success: true, 
+            userFound: true,
+            passwordMatch: isMatch,
+            message: "Password debug complete" 
+        });
+    } catch (error) {
+        console.error("❌ Error in debugPassword:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Internal Server Error" 
+        });
+    }
+};
+
+export { loginUser, registerUser, getUserByEmail, resetPassword, debugPasswordHashing, debugPassword };

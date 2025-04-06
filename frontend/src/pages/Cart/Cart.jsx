@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { StoreContext } from "../../context/StoreContext";
 import "./Cart.css";
 import axios from "axios";
+import ImageWithFallback from "../../components/ImageWithFallback/ImageWithFallback";
 
 const Cart = () => {
   const {
     cartItems,
     food_list,
+    combos,
     removeFromCart,
     getTotalCartAmount,
     url,
@@ -88,28 +90,46 @@ const Cart = () => {
         </div>
         <br />
         <hr />
+        {/* Render food items */}
         {food_list.map((item, index) => {
           if (cartItems[item._id] > 0) {
             return (
               <div key={index}>
                 <div className="cart-items-title cart-items-item">
-                  <img 
-                    src={`${url}/uploads/${item.imageUrl || item.image}`} 
+                  <ImageWithFallback 
+                    src={item.imageUrl || item.image} 
                     alt={item.name}
-                    onError={(e) => {
-                      console.log(`Failed to load image: ${e.target.src}`);
-                      e.target.src = `${url}/uploads/placeholder.jpg`;
-                      e.target.onerror = () => {
-                        e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiM5OTkiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==";
-                        e.target.onerror = null; // Prevent infinite loop
-                      };
-                    }}
-                  /> 
+                  />
                   <p>{item.name}</p>
                   <p>₹{item.price}</p>
                   <p>{cartItems[item._id]}</p>
                   <p>₹{item.price * cartItems[item._id]}</p>
                   <p onClick={() => removeFromCart(item._id)} className="cross">
+                    x
+                  </p>
+                </div>
+                <hr />
+              </div>
+            );
+          }
+          return null;
+        })}
+
+        {/* Render combo items */}
+        {combos.map((combo, index) => {
+          if (cartItems[combo._id] > 0) {
+            return (
+              <div key={`combo-${index}`}>
+                <div className="cart-items-title cart-items-item">
+                  <ImageWithFallback 
+                    src={combo.imageUrl || combo.image} 
+                    alt={combo.name}
+                  />
+                  <p>{combo.name} (Combo)</p>
+                  <p>₹{combo.price}</p>
+                  <p>{cartItems[combo._id]}</p>
+                  <p>₹{combo.price * cartItems[combo._id]}</p>
+                  <p onClick={() => removeFromCart(combo._id)} className="cross">
                     x
                   </p>
                 </div>
