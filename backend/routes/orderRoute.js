@@ -1,6 +1,5 @@
 import express from "express"
 import { 
-  listOrders, 
   placeOrder, 
   updateOrderStatus, 
   userOrders, 
@@ -10,7 +9,8 @@ import {
   getCancellationRequests,
   trackOrder,
   cancelOrder,
-  getOrderStatus
+  getOrderStatus,
+  listOrders
 } from "../controllers/orderController.js"
 import adminAuthMiddleware from "../middleware/adminAuth.js";
 import authMiddleware from "../middleware/auth.js";

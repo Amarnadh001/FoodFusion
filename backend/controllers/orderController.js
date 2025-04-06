@@ -577,5 +577,6 @@ export {
   requestCancellation,
   handleCancellationRequest,
   getCancellationRequests,
-  getOrderStatus
+  getOrderStatus,
+  listOrders
 };
