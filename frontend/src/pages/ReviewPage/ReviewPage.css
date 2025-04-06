@@ -48,6 +48,16 @@
 
 @media (max-width: 768px) {
     .review-page-container {
-        padding: 1.5rem;
+        padding: 1rem;
     }
-} 
+    .review-page h2 {
+        font-size: 1.2rem;
+    }
+    .review-subtitle {
+        font-size: 0.9rem;
+    }
+    .back-to-orders {
+        font-size: 0.8rem;
+        padding: 8px 12px;
+    }
+}

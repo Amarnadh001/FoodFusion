@@ -50,3 +50,43 @@
         padding: 2vw 4vw;
     }
 }
+
+@media only screen and (max-width: 768px) {
+  .header {
+    height: 50vw;
+    margin: 20px auto;
+    background-size: cover;
+  }
+  .header-contents {
+    gap: 2vw;
+    max-width: 70%;
+    padding: 1rem;
+    left: 4vw;
+  }
+  .header-contents h2 {
+    font-size: max(3.5vw, 18px);
+  }
+  .header-contents p {
+    font-size: 0.8vw;
+  }
+  .header-contents button1 {
+    padding: 0.8vw 2vw;
+    font-size: max(0.8vw, 11px);
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .header {
+    height: 60vw;
+  }
+  .header-contents {
+    gap: 0.5vw;
+    max-width: 90%;
+  }
+  .header-contents h2 {
+    font-size: max(2.5vw, 16px);
+  }
+  .header-contents p {
+    font-size: 0.6vw;
+  }
+}

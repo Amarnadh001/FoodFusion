@@ -178,3 +178,36 @@
     font-weight: 600;
     color: #ff4d4d;
   }
+
+@media only screen and (max-width: 768px) {
+  .food-item {
+    padding: 10px;
+  }
+  .food-item-name-rating p {
+    font-size: 16px;
+  }
+  .food-item-desc {
+    font-size: 14px;
+  }
+  .food-item-price {
+    font-size: 16px;
+  }
+  .food-item-info {
+    padding: 10px;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .food-item {
+    padding: 5px;
+  }
+  .food-item-name-rating p {
+    font-size: 14px;
+  }
+  .food-item-desc {
+    font-size: 12px;
+  }
+  .food-item-info {
+    padding: 5px;
+  }
+}

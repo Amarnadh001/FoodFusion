@@ -52,3 +52,22 @@
         font-size: 14px;
     }
 }
+
+/* Add responsive styles for all devices */
+@media only screen and (max-width: 768px) {
+  .explore-menu h1 {
+    font-size: 1.2rem;
+  }
+  .explore-menu-list {
+    gap: 15px;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .explore-menu h1 {
+    font-size: 1rem;
+  }
+  .explore-menu-list {
+    gap: 10px;
+  }
+}

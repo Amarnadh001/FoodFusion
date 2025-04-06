@@ -43,3 +43,29 @@
     background-color: grey;
     border: none;
 }
+
+@media only screen and (max-width: 768px) {
+  .footer {
+    gap: 15px;
+    padding: 15px 5vw;
+  }
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .footer-content-left, .footer-content-right, .footer-content-center {
+    align-items: center;
+  }
+  .footer-social-icons img {
+    width: 30px;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .footer {
+    padding: 5px 2vw;
+  }
+  .footer-content {
+    gap: 10px;
+  }
+}

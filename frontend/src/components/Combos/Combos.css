@@ -38,3 +38,18 @@
   font-weight: bold;
   font-size: 14px;
 }
+
+/* Add responsive styles for smaller devices */
+@media (max-width: 768px) {
+  .combos {
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+  }
+  .combos-list {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.5rem;
+  }
+  .combos .food-item {
+    aspect-ratio: auto;
+  }
+}

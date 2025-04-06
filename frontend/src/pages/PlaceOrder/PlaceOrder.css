@@ -86,6 +86,14 @@
     .payment-option span {
         font-size: 14px;
     }
+
+    .place-order-right {
+        padding: 10px;
+    }
+
+    .cart-total-details p {
+        font-size: 14px;
+    }
 }
 
 @media only screen and (max-width: 480px) {
@@ -95,6 +103,14 @@
     }
 
     .payment-option span {
+        font-size: 12px;
+    }
+
+    .place-order-right {
+        padding: 5px;
+    }
+
+    .cart-total-details p {
         font-size: 12px;
     }
 }

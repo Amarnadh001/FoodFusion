@@ -63,21 +63,40 @@
   .today-special {
     padding: 1rem;
     margin: 1rem 0;
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-    background: linear-gradient(135deg, #ff9966, #ff5e62);
-    border-radius: 12px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
   }
 
   .today-special-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 0.8rem;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.5rem;
   }
 
   .today-special-header h2 {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
+  }
+
+  .today-special .food-item {
+    aspect-ratio: auto;
+  }
+}
+
+/* Add responsive styles for all devices */
+@media only screen and (max-width: 768px) {
+  .today-special-header h2 {
+    font-size: 1.2rem;
+  }
+  .today-special-list {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .today-special {
+    padding: 0.5rem;
+  }
+  .today-special-header h2 {
+    font-size: 1rem;
+  }
+  .today-special-list {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   }
 }
