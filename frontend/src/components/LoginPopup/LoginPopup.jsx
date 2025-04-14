@@ -112,16 +112,25 @@ const LoginPopup = ({ setShowLogin }) => {
         setIsLoading(true);
 
         try {
-            console.log("Trying to login with:", data.email);
-            console.log("Password length:", data.password?.length);
-            
-            // Clean the password by trimming any whitespace
+            // Add more detailed logging
+            console.log("Login attempt details:", {
+                email: data.email.trim(),
+                passwordLength: data.password?.length,
+                url: `${url}/api/user/login`
+            });
+
             const cleanPassword = data.password.trim();
-            console.log("Cleaned password length:", cleanPassword.length);
             
             const response = await axios.post(`${url}/api/user/login`, {
                 email: data.email.trim(),
                 password: cleanPassword,
+            });
+
+            // Log full response for debugging
+            console.log("Login response:", {
+                success: response.data.success,
+                userId: response.data.userId,
+                hasToken: !!response.data.token
             });
 
             if (response.data.success) {
@@ -148,10 +157,13 @@ const LoginPopup = ({ setShowLogin }) => {
                 window.location.reload();
             }
         } catch (error) {
-            console.error("Login error:", error.response?.data);
-            const errorMsg = error.response?.data?.message || "Invalid credentials";
-            const status = error.response?.status || "Unknown";
-            alert(`❌ Login failed (${status}): ${errorMsg}`);
+            // Enhanced error logging
+            console.error("Login error details:", {
+                status: error.response?.status,
+                message: error.response?.data?.message,
+                error: error.response?.data
+            });
+            alert(`Login failed: ${error.response?.data?.message || 'Unknown error'}`);
         } finally {
             setIsLoading(false);
         }

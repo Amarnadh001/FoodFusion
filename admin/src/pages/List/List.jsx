@@ -4,7 +4,7 @@ import "./List.css";
 import api from "../../utils/api";
 
 // Get the API base URL from wherever it's defined in your app
-const API_URL = import.meta.env.VITE_BACKEND_URL || "https://foodfusion-backend-lfj9.onrender.com";
+const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
 const toggleCombo = async (foodId, currentStatus) => {
   try {
@@ -50,7 +50,7 @@ const List = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   
-  const categories = ["All", "Salad", "Rolls", "Deserts", "Sandwich", "Cake", "Pure Veg", "Pasta", "Noodles"];
+  const categories = ["All", "Salad", "Rolls", "Deserts", "Sandwich", "Cake", "Pure Veg", "Pure Non Veg", "Pasta", "Noodles", "Tiffins"];
 
   const fetchList = async () => {
     setIsLoading(true);

@@ -1943,4 +1943,5 @@
     grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
     margin-top: 20px;
     gap: 20px;
-    row-gap: 35px
+    row-gap: 35px;
+}

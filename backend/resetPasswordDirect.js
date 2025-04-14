@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 const resetPassword = async () => {
   try {
-    const response = await fetch('https://foodfusion-backend-lfj9.onrender.com/api/user/reset-password', {
+    const response = await fetch('http://localhost:4000/api/user/reset-password', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

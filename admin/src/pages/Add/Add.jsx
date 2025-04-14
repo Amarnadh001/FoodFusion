@@ -21,7 +21,7 @@ const Add = () => {
   });
   const [errors, setErrors] = useState({});
 
-  const categories = ["Salad", "Rolls", "Deserts", "Sandwich", "Cake", "Pure Veg", "Pasta", "Noodles"];
+  const categories = ["Salad", "Rolls", "Deserts", "Sandwich", "Cake", "Pure Veg", "Pure Non Veg", "Pasta", "Noodles", "Tiffins"];
 
   const onChangeHandler = (event) => {
     const name = event.target.name;
@@ -200,10 +200,52 @@ const Add = () => {
                   value={data.calories} 
                   onChange={onChangeHandler}
                   className={`form-input ${errors.calories ? 'input-error' : ''}`}
-                  placeholder="e.g., 250" 
+                  placeholder="e.g., 149" 
                   min="0"
                 />
                 {errors.calories && <div className="error-message">{errors.calories}</div>}
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Protein (g)</label>
+                <input 
+                  type="number" 
+                  name="protein" 
+                  value={data.protein} 
+                  onChange={onChangeHandler}
+                  className={`form-input ${errors.protein ? 'input-error' : ''}`}
+                  placeholder="e.g., 15" 
+                  min="0"
+                />
+                {errors.protein && <div className="error-message">{errors.protein}</div>}
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Carbs (g)</label>
+                <input 
+                  type="number" 
+                  name="carbs" 
+                  value={data.carbs} 
+                  onChange={onChangeHandler}
+                  className={`form-input ${errors.carbs ? 'input-error' : ''}`}
+                  placeholder="e.g., 30" 
+                  min="0"
+                />
+                {errors.carbs && <div className="error-message">{errors.carbs}</div>}
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Fat (g)</label>
+                <input 
+                  type="number" 
+                  name="fat" 
+                  value={data.fat} 
+                  onChange={onChangeHandler}
+                  className={`form-input ${errors.fat ? 'input-error' : ''}`}
+                  placeholder="e.g., 12" 
+                  min="0"
+                />
+                {errors.fat && <div className="error-message">{errors.fat}</div>}
               </div>
             </div>
             
