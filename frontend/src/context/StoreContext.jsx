@@ -7,7 +7,7 @@ export const StoreContext = createContext(null);
 const StoreContextProvider = (props) => {
     const navigate = useNavigate();
     const [cartItems, setCartItems] = useState({});
-    const url = "http://localhost:4000";
+    const url = "https://foodfusion-backend-lfj9.onrender.com";
     const [token, setToken] = useState("");
     const [userId, setUserId] = useState("");
     const [food_list, setFoodList] = useState([]);
