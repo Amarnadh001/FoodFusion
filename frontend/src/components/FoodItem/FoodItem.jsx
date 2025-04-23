@@ -5,7 +5,7 @@ import { StoreContext } from "../../context/StoreContext";
 import axios from "axios";
 import "./FoodItem.css";
 
-const FoodItem = ({ id, name, price, description, image, imageUrl, isCombo }) => {
+const FoodItem = ({ id, name, price, description, image, imageUrl, isCombo, calories, protein, carbs, fat }) => {
   const { cartItems, addToCart, removeFromCart, url } = useContext(StoreContext);
   const navigate = useNavigate();
   const [averageRating, setAverageRating] = useState(5); // Default to 5 stars
@@ -123,6 +123,34 @@ const FoodItem = ({ id, name, price, description, image, imageUrl, isCombo }) =>
           {renderStars()}
         </div>
         <p className="food-item-desc">{description}</p>
+        <div className="food-item-nutrition">
+          <div className="nutrition-grid">
+            {calories && (
+              <div className="nutrition-item">
+                <span className="label">Calories</span>
+                <span className="value">{calories} kcal</span>
+              </div>
+            )}
+            {protein && (
+              <div className="nutrition-item">
+                <span className="label">Protein</span>
+                <span className="value">{protein}g</span>
+              </div>
+            )}
+            {carbs && (
+              <div className="nutrition-item">
+                <span className="label">Carbs</span>
+                <span className="value">{carbs}g</span>
+              </div>
+            )}
+            {fat && (
+              <div className="nutrition-item">
+                <span className="label">Fat</span>
+                <span className="value">{fat}g</span>
+              </div>
+            )}
+          </div>
+        </div>
         <p className="food-item-price">₹{price}</p>
       </div>
     </div>

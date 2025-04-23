@@ -122,66 +122,46 @@ const MyOrders = () => {
         toast.success("Thank you for your review!");
     }
 
-    const handleCancelRequest = async (orderId) => {
-        if (!cancellationReason.trim()) {
-            toast.error('Please provide a reason for cancellation');
+    const handleCancelRequest = async () => {
+        if (!selectedOrder || !cancellationReason.trim()) {
+            toast.error('Please select an order and provide a reason for cancellation.');
             return;
         }
 
         try {
             setLoading(true);
-            const currentToken = getToken();
-            const currentUserId = getUserId();
-
-            if (!currentToken || !currentUserId) {
-                console.log('No token or userId found');
-                setShowLogin(true);
-                return;
-            }
-
-            console.log('Submitting cancellation request:', {
-                orderId,
-                reason: cancellationReason,
-                userId: currentUserId
-            });
-
+            const token = getToken();
             const response = await axios.post(
                 `${url}/api/order/cancel-request`,
                 {
-                    orderId: orderId,
-                    reason: cancellationReason,
-                    userId: currentUserId
+                    orderId: selectedOrder._id,
+                    reason: cancellationReason
                 },
                 {
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
-                        'token': currentToken
+                        'token': token
                     }
                 }
             );
 
             if (response.data.success) {
-                toast.success('Cancellation request submitted successfully');
-                setCancellationReason('');
-                setSelectedOrder(null);
-                setShowCancellationModal(false);
-                fetchOrders();
+                toast.success(response.data.message || 'Cancellation request submitted successfully');
+                
+                // Update the order in the local state
+                setData(prevData => prevData.map(order => 
+                    order._id === selectedOrder._id 
+                        ? { ...order, cancellationRequest: { status: 'pending', reason: cancellationReason } } 
+                        : order
+                ));
+                
+                handleCancelModalClose();
             } else {
                 toast.error(response.data.message || 'Failed to submit cancellation request');
             }
         } catch (error) {
             console.error('Error submitting cancellation request:', error);
-            if (error.response?.status === 401) {
-                setShowLogin(true);
-            } else if (error.response?.status === 400) {
-                toast.error(error.response.data.message || 'Invalid request. Please check order status.');
-            } else if (error.response?.status === 404) {
-                toast.error('Order not found. Please refresh the page.');
-            } else {
-                const errorMessage = error.response?.data?.message || 'Failed to submit cancellation request. Please try again.';
-                setError(errorMessage);
-                toast.error(errorMessage);
-            }
+            toast.error(error.response?.data?.message || 'An error occurred. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -198,54 +178,22 @@ const MyOrders = () => {
                 setLoading(false);
                 return;
             }
-
-            // Get authentication
-            const currentToken = getToken();
-            const currentUserId = getUserId();
-
-            if (!currentToken || !currentUserId) {
-                console.log('No token or userId found');
-                setShowLogin(true);
-                setLoading(false);
-                return;
-            }
-
-            console.log('Tracking order:', { orderId, currentStatus: currentOrder.status });
-
-            // Get the order status from the backend (try the track-test endpoint which is known to work)
-            const response = await axios.get(
-                `${url}/api/order/track-test/${orderId}`,
-                {
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'token': currentToken
-                    }
-                }
-            );
-
-            if (response.data.success) {
-                const { status } = response.data.data;
-                
-                // Update local state if status is different
-                if (status && status !== currentOrder.status) {
-                    toast.success(`Order status: ${status}`);
-                    setData(prevData => prevData.map(order => 
-                        order._id === orderId 
-                            ? { ...order, status: status } 
-                            : order
-                    ));
-                } else {
-                    toast.info(`Current order status: ${currentOrder.status}`);
-                }
-            } else {
-                toast.info(`Current order status: ${currentOrder.status}`);
-            }
             
-        } catch (error) {
-            console.error('Error tracking order:', error);
-            if (error.response?.status === 401) {
-                toast.error('Authentication error. Please log in again.');
-                setShowLogin(true);
+            // Use the appropriate tracking mechanism based on order status
+            if (currentOrder.status === ORDER_STATUSES.PROCESSING) {
+                toast.info('Your food is being prepared. Please wait.');
+            } else if (currentOrder.status === ORDER_STATUSES.PREPARED) {
+                toast.info('Your food is ready and waiting for pickup. Please show your order ID to collect your food.');
+            } else if (currentOrder.status === ORDER_STATUSES.OUT_FOR_DELIVERY) {
+                // Case for delivery tracking
+                try {
+                    // Navigate to the delivery tracking page
+                    navigate(`/track-delivery/${orderId}`);
+                    return; // Exit the function as we're navigating away
+                } catch (navigationError) {
+                    console.error('Error navigating to tracking page:', navigationError);
+                    toast.error('Failed to track your delivery. Please try again.');
+                }
             } else {
                 // Fallback to showing the current status
                 toast.info(`Current order status: ${currentOrder.status}`);
@@ -373,7 +321,7 @@ const MyOrders = () => {
                         />
                         <div className="modal-buttons">
                             <button onClick={handleCancelModalClose}>Close</button>
-                            <button onClick={() => handleCancelRequest(selectedOrder._id)}>Submit</button>
+                            <button onClick={handleCancelRequest}>Submit</button>
                         </div>
                     </div>
                 </div>

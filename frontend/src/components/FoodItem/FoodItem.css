@@ -179,6 +179,21 @@
     color: #ff4d4d;
   }
 
+  .food-item-nutrition {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+
+  .food-item-nutrition span {
+    background-color: #f5f5f5;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: #666;
+  }
+
 @media only screen and (max-width: 768px) {
   .food-item {
     padding: 10px;
